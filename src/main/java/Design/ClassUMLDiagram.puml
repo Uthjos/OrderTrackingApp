@@ -1,0 +1,112 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class FoodItem {
+- name : String
+- quantity : int
+- price : double
+
++ FoodItem()
++ FoodItem(name : String, quantity : int, price : double)
++ getName() : String
++ setName(name : String) : void
++ getQuantity() : int
++ setQuantity(quantity : int) : void
++ getPrice() : double
++ setPrice(price : double) : void
++ toString() : String
+}
+
+class Order {
+- orderID : int
+- date : long
+- totalPrice : double
+- type : String
+- status : String
+- foodList : ArrayList<FoodItem>
+
++ Order()
++ Order(orderId : int, type : String, date : long, foodList : List<FoodItem>)
++ getOrderId() : int
++ getDate() : long
++ getTotalPrice() : double
++ getType() : String
++ getStatus() : String
++ getFoodList() : ArrayList<FoodItem>
++ sumPrice() : double
++ addFoodItem(f : FoodItem) : boolean
++ setStatus(newStatus : String) : void
++ toString() : String
+}
+
+class Parser {
+- {static} nextOrderNumber : int
++ {static} parseJSONOrder(file : File) : Order
+- {static} getNextOrderNumber() : int
+}
+
+class OrderDriver {
+- orders : List<Order>
+- incompleteOrders : List<Order>
+- completeOrders : List<Order>
+
++ OrderDriver()
++ addOrder(order : Order) : void
++ startOrder(order : Order) : void
++ completeOrder(order : Order) : void
++ completeAllOrders() : void
++ displayOrder(orderID : int) : String
++ getOrders() : List<Order>
++ getIncompleteOrders() : List<Order>
++ getCompleteOrders() : List<Order>
++ {static} exportOrdersToJSON(fileName : String, orderDriver : OrderDriver) : boolean
+}
+
+class SystemGUI {
+- driver : OrderDriver
++ SystemGUI (driver : OrderDriver)
+- createAndShowGUI() : void
+}
+
+class ShowFileChooser {
++ {static} showFileChooser(parentFrame : JFrame) : File
++ {static} importOrder(parentFrame : JFrame, driver : OrderDriver) : void
+}
+
+class DisplayOrdersDialog{
++ DisplayOrdersDialog(parentFrame : JFrame, driver : OrderDriver)
+- showOrders(parentFrame : JFrame, driver : OrderDriver, status : String) : void
+}
+
+class ExportJSON{
++ {static} exportOrders(parentFrame : JFrame, orderDriver : OrderDriver) : void
+}
+
+class OrderSelectionDropdown{
++ OrderSelectionDropdown(parentFrame : JFrame, driver : OrderDriver, action : Action)
+- handleOrderAction(parentFrame : JFrame, driver : OrderDriver, order : Order, action : Action) : void
++ enum Action {DISPLAY, START, COMPLETE}
+}
+
+SystemGUI -- "1" OrderDriver : Uses
+SystemGUI -- "0..*" DisplayOrdersDialog : Creates
+SystemGUI -- "0..*" OrderSelectionDropdown : Creates
+SystemGUI -- "1" ShowFileChooser : Uses
+SystemGUI -- "1" ExportJSON : Uses
+
+DisplayOrdersDialog -- "1" OrderDriver
+OrderSelectionDropdown -- "1" OrderDriver
+ShowFileChooser -- "1" OrderDriver
+ExportJSON -- "1" OrderDriver
+
+OrderDriver -- "0..*" Order
+Order *-- "0..*" FoodItem
+
+Parser ..> Order
+Parser .. ShowFileChooser
+
+SystemGUI -[hidden]-> OrderDriver
+OrderDriver -[hidden]-> Order
+Order -[hidden]-> FoodItem
+
+@enduml

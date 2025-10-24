@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+actor RestaurantStaff
+participant SystemGUI
+participant ShowFileChooser
+participant Parser
+participant OrderDriver
+
+RestaurantStaff -> SystemGUI : Click "Import Order JSON" button
+SystemGUI -> ShowFileChooser : importOrder(parentFrame, driver)
+ShowFileChooser -> ShowFileChooser : Open file chooser
+RestaurantStaff -> ShowFileChooser : Select JSON file
+ShowFileChooser -> Parser : parseJSONOrder(file)
+Parser -> Parser : Create Order object from JSON
+Parser --> ShowFileChooser : Return Order
+ShowFileChooser -> OrderDriver : addOrder(order)
+OrderDriver --> ShowFileChooser : Confirmation
+ShowFileChooser --> SystemGUI : Show message "JSON imported into Order #ID"
+SystemGUI --> RestaurantStaff : Display confirmation
+
+@enduml
