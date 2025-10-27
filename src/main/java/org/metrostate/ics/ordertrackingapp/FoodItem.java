@@ -1,4 +1,4 @@
-package main.java;
+package org.metrostate.ics.ordertrackingapp;
 
 /**
  * Represents a food item in an order.

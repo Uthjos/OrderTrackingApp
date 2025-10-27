@@ -1,4 +1,4 @@
-package main.java;
+package org.metrostate.ics.ordertrackingapp;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
