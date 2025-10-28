@@ -5,11 +5,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox spacing="10.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.metrostate.ics.ordertrackingapp.OrderTrackerController">
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.metrostate.ics.ordertrackingapp.OrderTrackerController"
+      spacing="10.0" style="-fx-background-color: white;">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
+    <!-- Header with title and exit button -->
     <HBox spacing="20.0">
         <padding>
             <Insets bottom="20.0" />
@@ -21,15 +24,17 @@
             </font>
         </Label>
 
+        <!-- Spacer to push exit button to the right -->
         <Region HBox.hgrow="ALWAYS" />
 
-        <Button onAction="#exitApplication" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-cursor: hand;" text="Exit">
+        <Button text="Exit" onAction="#exitApplication"
+                style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-cursor: hand;">
             <font>
                 <Font name="System Bold" size="14.0" />
             </font>
         </Button>
     </HBox>
-   <Label text="Sort Orders: (not implemented yet)">
+    <Label text="Sort Orders: (not implemented yet)">
       <font>
          <Font name="System Bold Italic" size="13.0" />
       </font>
@@ -48,7 +53,7 @@
          <Button mnemonicParsing="false" text="GrubStop" />
       </children>
    </HBox>
-
+<!-- scrollable area for orders. populated in OrderTrackerController -->
     <ScrollPane fx:id="scrollPane" fitToWidth="true" VBox.vgrow="ALWAYS">
         <VBox fx:id="ordersContainer" spacing="15.0" style="-fx-background-color: white;">
             <padding>

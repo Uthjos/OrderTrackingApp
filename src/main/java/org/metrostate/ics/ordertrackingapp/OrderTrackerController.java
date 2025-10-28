@@ -18,47 +18,32 @@ public class OrderTrackerController {
     @FXML
     private VBox ordersContainer;
 
-    @FXML
-    private ScrollPane scrollPane;
-
     private List<String> orderFiles;
     private OrderListener orderListener;
 
-    /**
-     * Initializes the controller
-     * Called automatically by JavaFX after FXML is loaded
-     */
+
     @FXML
     public void initialize() {
         this.orderFiles = new ArrayList<>();
-        // No need to create header here - it's in the FXML now
     }
 
-    /**
-     * Sets the OrderListener reference so it can be stopped on exit
-     */
     public void setOrderListener(OrderListener orderListener) {
         this.orderListener = orderListener;
     }
 
     /**
-     * Exits the application gracefully
      * Called by the Exit button in the FXML
      */
     @FXML
     private void exitApplication() {
         System.out.println("Exiting application...");
 
-        // Stop the OrderListener thread
+        // stop the OrderListener thread
         if (orderListener != null) {
             orderListener.stop();
             System.out.println("OrderListener stopped.");
         }
-
-        // Exit the JavaFX application
         Platform.exit();
-
-        // Ensure JVM exits
         System.exit(0);
     }
 
@@ -81,7 +66,7 @@ public class OrderTrackerController {
         orderFiles.add(fileName);
 
         VBox fileBox = createFileDisplay(fileName);
-        // Insert at top of the orders list
+        // insert at top of the orders list
         ordersContainer.getChildren().addFirst(fileBox);
     }
 
