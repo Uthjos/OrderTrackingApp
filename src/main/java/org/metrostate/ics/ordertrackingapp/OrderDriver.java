@@ -126,7 +126,7 @@ public class OrderDriver {
 
         File fileDir = new File(fileDirectory);
         if (!fileDir.exists()) {
-            boolean created = fileDir.mkdir();
+            boolean created = fileDir.mkdirs();
             if (!created) {
                 System.out.println("Error creating directory: " + fileDirectory);
                 return false;
