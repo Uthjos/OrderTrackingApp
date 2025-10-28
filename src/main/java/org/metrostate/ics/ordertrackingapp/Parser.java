@@ -7,6 +7,7 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * Parser adapter class that reads a JSON file and creates a corresponding Order object.
  * Populates the Order with data from the JSON file.
@@ -25,13 +26,13 @@ public class Parser {
      */
 	public static Order parseJSONOrder(File file) throws IOException {
         long orderDate;
-        String orderType;
+        Type orderType;
         List<FoodItem> foodItemList = new ArrayList<>();
 
         JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
         JSONObject orderJson = (JSONObject) jsonObject.get("order");
         orderDate = (long) orderJson.get("order_date");
-        orderType = (String) orderJson.get("type");
+        orderType = Order.parseOrderType((String) orderJson.get("type"));
         JSONArray itemArray = (JSONArray) orderJson.get("items");
         for (Object o : itemArray) {
             int quantity = (int) (long) ((JSONObject) o).get("quantity");

@@ -12,7 +12,7 @@ public class Order {
     private int orderId;
     private long date;
     private double totalPrice;
-    private String type;
+    private Type type;
     private Status status;
     private ArrayList<FoodItem> foodList;
 
@@ -32,7 +32,7 @@ public class Order {
      * @param date      The timestamp of the order
      * @param foodList  The initial list of food items
      */
-    public Order(int orderId, String type, long date, List<FoodItem> foodList) {
+    public Order(int orderId, Type type, long date, List<FoodItem> foodList) {
         this.orderId = orderId;
         this.type = type;
         this.date = date;
@@ -68,7 +68,7 @@ public class Order {
      *
      * @return The order type
      */
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
@@ -173,6 +173,32 @@ public class Order {
                 String.format("\n\nTotal Price: $%.2f", totalPrice);
     }
 
+    public static Status parseOrderStatus(String stringStatus){
+        if(stringStatus == null){
+            return null;
+        }
+
+        try {
+            return Status.valueOf(stringStatus);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid status string: " + stringStatus);
+            return null;
+        }
+    }
+
+    public static Type parseOrderType(String stringType){
+        if(stringType == null){
+            return null;
+        }
+
+        try {
+            return Type.valueOf(stringType);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid type string: " + stringType);
+            return null;
+        }
+    }
+
     public String displayStatus() {
         switch (status) {
             case completed:
@@ -185,6 +211,17 @@ public class Order {
                 return "Cancelled";
             default:
                 return "Error: No Status";
+        }
+    }
+
+    public String displayType(){
+        switch (type) {
+        case togo:
+            return "Togo";
+        case pickup:
+            return "Pickup";
+        default:
+            return "Error: No Type";
         }
     }
 }
