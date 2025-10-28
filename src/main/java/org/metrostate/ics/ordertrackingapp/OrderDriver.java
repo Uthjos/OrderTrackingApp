@@ -3,6 +3,7 @@ package org.metrostate.ics.ordertrackingapp;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -112,12 +113,12 @@ public class OrderDriver {
                 foodJSON.put("name", food.getName());
                 foodJSON.put("quantity", food.getQuantity());
                 foodJSON.put("price", food.getPrice());
-                orderFoodsList.add(foodJSON);
+                orderFoodsList.put(foodJSON);
             }
 
             ordersJSON.put("foodList", orderFoodsList);
 
-            ordersArray.add(ordersJSON);
+            ordersArray.put(ordersJSON);
         }
 
         String fileDirectory = "code/src/main/java/Export";
@@ -137,9 +138,9 @@ public class OrderDriver {
         // write ordersArray to a file as a single JSON array, with newlines between objects
         try(FileWriter fw = new FileWriter(filePath)) {
             fw.write("[\n");
-            for (int i = 0; i < ordersArray.size(); i++) {
+            for (int i = 0; i < ordersArray.length(); i++) {
                 fw.write(ordersArray.get(i).toString());
-                if (i < ordersArray.size() - 1) {
+                if (i < ordersArray.length() - 1) {
                     fw.write(",\n");
                 }
             }
