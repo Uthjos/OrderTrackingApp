@@ -55,7 +55,7 @@ public class OrderDriver {
      */
     public void completeOrder(Order order) {
         // only complete if it's in progress, otherwise do nothing
-        if (order.getStatus() == Status.incoming) {
+        if (order.getStatus() == Status.inProgress) {
             order.setStatus(Status.completed);
         }
     }
@@ -191,7 +191,6 @@ public class OrderDriver {
      * @param order The order to cancel
      */
     public void cancelOrder(Order order) {
-        orders.remove(order);
         order.setStatus(Status.cancelled);
     }
 
@@ -200,13 +199,13 @@ public class OrderDriver {
      *
      * @return List of canceled orders
      */
-    public List<Order> getCanceledOrders() {
-        List<Order> canceledOrders = new ArrayList<>();
+    public List<Order> getCancelledOrders() {
+        List<Order> cancelledOrders = new ArrayList<>();
         for (Order order : orders) {
             if (order.getStatus() == Status.cancelled) {
-                canceledOrders.add(order);
+                cancelledOrders.add(order);
             }
         }
-        return canceledOrders;
+        return cancelledOrders;
     }
 }
