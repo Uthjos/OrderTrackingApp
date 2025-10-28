@@ -47,8 +47,8 @@ public class OrderDriver {
      */
     public void startOrder(Order order) {
         // only start if it's incoming, otherwise do nothing
-        if ("INCOMING".equals(order.getStatus())) {
-            order.setStatus("IN PROGRESS");
+        if (order.getStatus() == Status.incoming) {
+            order.setStatus(Status.inProgress);
         }
     }
 
@@ -60,8 +60,8 @@ public class OrderDriver {
      */
     public void completeOrder(Order order) {
         // only complete if it's in progress, otherwise do nothing
-        if ("IN PROGRESS".equals(order.getStatus())) {
-            order.setStatus("COMPLETED");
+        if (order.getStatus() == Status.incoming) {
+            order.setStatus(Status.completed);
             incompleteOrders.remove(order);
             completeOrders.add(order); // maybe not necessary
         }
@@ -169,7 +169,7 @@ public class OrderDriver {
      */
     public List<Order> getCompleteOrders() {
         for (Order order : orders) {
-            if ("COMPLETED".equals(order.getStatus()) && !completeOrders.contains(order)) {
+            if (order.getStatus() == Status.completed && !completeOrders.contains(order)) {
                 completeOrders.add(order);
             }
         }
@@ -183,7 +183,7 @@ public class OrderDriver {
      */
     public List<Order> getIncompleteOrders() {
         for (Order order : orders) {
-            if (!"COMPLETED".equals(order.getStatus()) && !incompleteOrders.contains(order)) {
+            if (order.getStatus() != Status.completed && !incompleteOrders.contains(order)) {
                 incompleteOrders.add(order);
 
             }
@@ -199,7 +199,7 @@ public class OrderDriver {
      */
     public void cancelOrder(Order order) {
         orders.remove(order);
-        order.setStatus("CANCELED");
+        order.setStatus(Status.cancelled);
     }
 
     /**
@@ -210,7 +210,7 @@ public class OrderDriver {
     public List<Order> getCanceledOrders() {
         List<Order> canceledOrders = new ArrayList<>();
         for (Order order : orders) {
-            if ("CANCELED".equals(order.getStatus())) {
+            if (order.getStatus() == Status.cancelled) {
                 canceledOrders.add(order);
             }
         }
