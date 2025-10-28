@@ -178,7 +178,7 @@ public class OrderDriver {
     public List<Order> getIncompleteOrders() {
         List<Order> incompleteOrders = new ArrayList<>();
         for (Order order : orders) {
-            if (order.getStatus() != Status.completed && !incompleteOrders.contains(order)) {
+            if (order.getStatus() != Status.completed) {
                 incompleteOrders.add(order);
             }
         }
