@@ -16,16 +16,12 @@ import java.util.ArrayList;
  */
 public class OrderDriver {
     private List<Order> orders;
-    private List<Order> incompleteOrders;
-    private List<Order> completeOrders;
 
     /**
      * Constructs a new OrderDriver with empty lists for all orders, incomplete orders, and completed orders (empty constructor).
      */
     public OrderDriver() {
         orders = new ArrayList<>();
-        incompleteOrders = new ArrayList<>();
-        completeOrders = new ArrayList<>();
     }
 
     /**
@@ -36,7 +32,6 @@ public class OrderDriver {
      */
     public void addOrder(Order order) {
         orders.add(order);
-        incompleteOrders.add(order); // this list maybe not necessary, gui searches by status in for loops
     }
 
     /**
@@ -62,8 +57,6 @@ public class OrderDriver {
         // only complete if it's in progress, otherwise do nothing
         if (order.getStatus() == Status.incoming) {
             order.setStatus(Status.completed);
-            incompleteOrders.remove(order);
-            completeOrders.add(order); // maybe not necessary
         }
     }
 
@@ -168,12 +161,13 @@ public class OrderDriver {
      * @return List of completed orders
      */
     public List<Order> getCompleteOrders() {
+        List<Order> completedOrders = new ArrayList<>();
         for (Order order : orders) {
-            if (order.getStatus() == Status.completed && !completeOrders.contains(order)) {
-                completeOrders.add(order);
+            if (order.getStatus() == Status.completed) {
+                completedOrders.add(order);
             }
         }
-        return completeOrders;
+        return completedOrders;
     }
 
     /**
@@ -182,12 +176,11 @@ public class OrderDriver {
      * @return List of incomplete orders
      */
     public List<Order> getIncompleteOrders() {
+        List<Order> incompleteOrders = new ArrayList<>();
         for (Order order : orders) {
             if (order.getStatus() != Status.completed && !incompleteOrders.contains(order)) {
                 incompleteOrders.add(order);
-
             }
-
         }
         return incompleteOrders;
     }
