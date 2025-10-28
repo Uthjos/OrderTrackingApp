@@ -70,8 +70,8 @@ public class OrderDriver {
     /**
      * Finds an order by its ID and returns its details as a formatted string.
      *
-     * @param orderID   The unique ID of the order
-     * @return          A string representation of the order, or "Order not found" if no order matches the ID
+     * @param orderID The unique ID of the order
+     * @return A string representation of the order, or "Order not found" if no order matches the ID
      */
     public String displayOrder(int orderID) {
         for (Order order : orders) {
@@ -87,9 +87,9 @@ public class OrderDriver {
      * and puts them in a file in the directory code/src/main/java/export.
      * note: export is not pretty to do that we need libraries GSON or Jackson
      *
-     * @param fileName      The name of the file to export to
-     * @param orderDriver   The OrderDriver instance containing all orders
-     * @return              true if the export succeeds, false otherwise
+     * @param fileName    The name of the file to export to
+     * @param orderDriver The OrderDriver instance containing all orders
+     * @return true if the export succeeds, false otherwise
      */
     public static boolean exportOrdersToJSON(String fileName, OrderDriver orderDriver) {
 
@@ -107,17 +107,17 @@ public class OrderDriver {
             ordersJSON.put("completeTime", System.currentTimeMillis());
 
             JSONArray orderFoodsList = new JSONArray();
-            for (FoodItem food : order.getFoodList()){
+            for (FoodItem food : order.getFoodList()) {
                 JSONObject foodJSON = new JSONObject();
                 foodJSON.put("name", food.getName());
                 foodJSON.put("quantity", food.getQuantity());
                 foodJSON.put("price", food.getPrice());
-                orderFoodsList.add(foodJSON);
+                orderFoodsList.put(foodJSON);
             }
 
             ordersJSON.put("foodList", orderFoodsList);
 
-            ordersArray.add(ordersJSON);
+            ordersArray.put(ordersJSON);
         }
 
         String fileDirectory = "code/src/main/java/Export";
@@ -135,11 +135,11 @@ public class OrderDriver {
         }
 
         // write ordersArray to a file as a single JSON array, with newlines between objects
-        try(FileWriter fw = new FileWriter(filePath)) {
+        try (FileWriter fw = new FileWriter(filePath)) {
             fw.write("[\n");
-            for (int i = 0; i < ordersArray.size(); i++) {
+            for (int i = 0; i < ordersArray.length(); i++) {
                 fw.write(ordersArray.get(i).toString());
-                if (i < ordersArray.size() - 1) {
+                if (i < ordersArray.length() - 1) {
                     fw.write(",\n");
                 }
             }
@@ -166,12 +166,53 @@ public class OrderDriver {
      *
      * @return List of completed orders
      */
-    public List<Order> getCompleteOrders() { return completeOrders; }
+    public List<Order> getCompleteOrders() {
+        for (Order order : orders) {
+            if ("COMPLETED".equals(order.getStatus()) && !completeOrders.contains(order)) {
+                completeOrders.add(order);
+            }
+        }
+        return completeOrders;
+    }
 
     /**
      * Returns a list of incomplete orders.
      *
      * @return List of incomplete orders
      */
-    public List<Order> getIncompleteOrders() { return incompleteOrders; }
+    public List<Order> getIncompleteOrders() {
+        for (Order order : orders) {
+            if (!"COMPLETED".equals(order.getStatus()) && !incompleteOrders.contains(order)) {
+                incompleteOrders.add(order);
+
+            }
+
+        }
+        return incompleteOrders;
+    }
+
+    /**
+     * Cancels an order by removing it from the orders list and setting its status to "CANCELED".
+     *
+     * @param order The order to cancel
+     */
+    public void cancelOrder(Order order) {
+        orders.remove(order);
+        order.setStatus("CANCELED");
+    }
+
+    /**
+     * Returns a list of canceled orders.
+     *
+     * @return List of canceled orders
+     */
+    public List<Order> getCanceledOrders() {
+        List<Order> canceledOrders = new ArrayList<>();
+        for (Order order : orders) {
+            if ("CANCELED".equals(order.getStatus())) {
+                canceledOrders.add(order);
+            }
+        }
+        return canceledOrders;
+    }
 }

@@ -1,7 +1,8 @@
 package org.metrostate.ics.ordertrackingapp;
 
 import org.json.JSONArray;
-import org.json.*;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,14 +22,13 @@ public class Parser {
      * @param file              JSON file to be read
      * @return                  Order object populated with data from the JSON file
      * @throws IOException      if the file cannot be read
-     * @throws ParseException   if the JSON file is invalid or incorrectly formatted
      */
-	public static Order parseJSONOrder(File file) throws IOException, ParseException {
+	public static Order parseJSONOrder(File file) throws IOException {
         long orderDate;
         String orderType;
         List<FoodItem> foodItemList = new ArrayList<>();
 
-        JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(file));
+        JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
         JSONObject orderJson = (JSONObject) jsonObject.get("order");
         orderDate = (long) orderJson.get("order_date");
         orderType = (String) orderJson.get("type");
@@ -56,7 +56,7 @@ public class Parser {
      * Uses a hardcoded JSON file to test the parser method.
      * Prints to console.
      */
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException {
         File file = new File("code/src/main/java/Resources/order_09-16-2025_10-00.json");
         Order myOrder = Parser.parseJSONOrder(file);
         System.out.println(myOrder);
