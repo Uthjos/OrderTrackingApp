@@ -1,8 +1,7 @@
 package org.metrostate.ics.ordertrackingapp;
 
-import org.json.simple.JSONArray;
-import org.json.simple.*;
-import org.json.simple.parser.*;
+import org.json.JSONArray;
+import org.json.*;
 
 import java.io.*;
 import java.util.ArrayList;
