@@ -3,6 +3,8 @@ package org.metrostate.ics.ordertrackingapp;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.metrostate.ics.ordertrackingapp.Status.incoming;
+
 /**
  * Represents a customer's order in the system.
  */
@@ -11,7 +13,7 @@ public class Order {
     private long date;
     private double totalPrice;
     private String type;
-    private String status;
+    private Status status;
     private ArrayList<FoodItem> foodList;
 
     /**
@@ -19,7 +21,7 @@ public class Order {
      */
     public Order() {
         this.foodList = new ArrayList<>();
-        this.status = "INCOMING";
+        this.status = incoming;
     }
 
     /**
@@ -39,7 +41,7 @@ public class Order {
         } else {
             this.foodList = new ArrayList<>();
         }
-        this.status = "INCOMING";
+        this.status = incoming;
         this.totalPrice = sumPrice();
     }
 
@@ -75,7 +77,7 @@ public class Order {
      *
      * @return The order status
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
@@ -146,10 +148,8 @@ public class Order {
      *
      * @param newStatus The new status
      */
-    public void setStatus(String newStatus) {
-        if (newStatus.equals("IN PROGRESS") || newStatus.equals("COMPLETED") || newStatus.equals("INCOMING")) {
-            status = newStatus;
-        }
+    public void setStatus(Status newStatus) {
+        this.status = newStatus;
     }
 
     /**
@@ -171,5 +171,20 @@ public class Order {
                 "Items: " +
                 s +
                 String.format("\n\nTotal Price: $%.2f", totalPrice);
+    }
+
+    public String displayStatus() {
+        switch (status) {
+            case completed:
+                return "Completed";
+            case incoming:
+                return "Incoming";
+            case inProgress:
+                return "In Progress";
+            case cancelled:
+                return "Cancelled";
+            default:
+                return "Error: No Status";
+        }
     }
 }
