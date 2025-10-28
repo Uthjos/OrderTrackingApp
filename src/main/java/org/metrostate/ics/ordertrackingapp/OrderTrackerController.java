@@ -36,12 +36,10 @@ public class OrderTrackerController {
      */
     @FXML
     private void exitApplication() {
-        System.out.println("Exiting application...");
 
         // stop the OrderListener thread
         if (orderListener != null) {
             orderListener.stop();
-            System.out.println("OrderListener stopped.");
         }
         Platform.exit();
         System.exit(0);

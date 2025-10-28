@@ -93,7 +93,6 @@ public class OrderListener implements Runnable {
                     // wait for events
                     key = watchService.take();
                 } catch (InterruptedException e) {
-                    System.out.println("OrderListener interrupted");
                     break;
                 }
 
@@ -142,7 +141,6 @@ public class OrderListener implements Runnable {
 
             watchService.close();
         } catch (IOException e) {
-            System.err.println("Error in OrderListener: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -31,8 +31,6 @@ public class OrderTrackerApp extends Application {
 
         orderListener.start();
 
-        System.out.println("Monitoring directory: " + testOrdersPath);
-
         stage.setTitle("Order Tracking System");
         stage.setScene(scene);
         stage.show();
