@@ -28,19 +28,21 @@ public class Parser {
         String orderType;
         List<FoodItem> foodItemList = new ArrayList<>();
 
-        JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
-        JSONObject orderJson = (JSONObject) jsonObject.get("order");
-        orderDate = (long) orderJson.get("order_date");
-        orderType = (String) orderJson.get("type");
-        JSONArray itemArray = (JSONArray) orderJson.get("items");
-        for (Object o : itemArray) {
-            int quantity = (int) (long) ((JSONObject) o).get("quantity");
-            double price = (double) ((JSONObject) o).get("price");
-            String name = (String) ((JSONObject) o).get("name");
-            foodItemList.add(new FoodItem(name, quantity, price));
-
+        try (FileReader fr = new FileReader(file)) {
+            JSONObject jsonObject = new JSONObject(new JSONTokener(fr));
+            JSONObject orderJson = jsonObject.getJSONObject("order");
+            orderDate = orderJson.getLong("order_date");
+            orderType = orderJson.getString("type");
+            JSONArray itemArray = orderJson.getJSONArray("items");
+            for (int i = 0; i < itemArray.length(); i++) {
+                JSONObject item = itemArray.getJSONObject(i);
+                int quantity = item.getInt("quantity");
+                double price = item.getDouble("price");
+                String name = item.getString("name");
+                foodItemList.add(new FoodItem(name, quantity, price));
+            }
         }
-        return new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
+         return new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
     }
 
     /**

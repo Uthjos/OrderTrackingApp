@@ -5,20 +5,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.metrostate.ics.ordertrackingapp.OrderTrackerController"
-      spacing="10.0" style="-fx-background-color: white;">
+<VBox spacing="10.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.metrostate.ics.ordertrackingapp.OrderTrackerController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
     <!-- Header with title and exit button -->
-    <HBox spacing="20.0">
+    <HBox prefHeight="27.0" prefWidth="292.0" spacing="20.0">
         <padding>
             <Insets bottom="20.0" />
         </padding>
-
-        <Label text="Current Orders">
+   
+        <Label text="Manage Orders">
             <font>
                 <Font name="System Bold" size="24.0" />
             </font>
@@ -27,14 +25,13 @@
         <!-- Spacer to push exit button to the right -->
         <Region HBox.hgrow="ALWAYS" />
 
-        <Button text="Exit" onAction="#exitApplication"
-                style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-cursor: hand;">
+        <Button onAction="#exitApplication" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-cursor: hand;" text="Exit">
             <font>
                 <Font name="System Bold" size="14.0" />
             </font>
         </Button>
     </HBox>
-    <Label text="Sort Orders: (not implemented yet)">
+    <Label text="Sort by:">
       <font>
          <Font name="System Bold Italic" size="13.0" />
       </font>
