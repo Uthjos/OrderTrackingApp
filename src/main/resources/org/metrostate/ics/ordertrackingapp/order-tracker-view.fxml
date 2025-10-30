@@ -49,7 +49,7 @@
         </ScrollPane>
 
         <!-- right: details panel that displays expanded order info -->
-        <VBox fx:id="detailContainer" prefWidth="320.0" spacing="8.0" style="-fx-border-color: #e0e0e0; -fx-padding: 10; -fx-background-color: #fafafa;">
+        <VBox fx:id="detailContainer" prefWidth="320.0" spacing="8.0" style="-fx-border-color: #e0e0e0; -fx-padding: 10; -fx-background-color: #DFE8E8;">
             <Label text="Order Details">
                 <font>
                     <Font name="System Bold" size="16.0" />

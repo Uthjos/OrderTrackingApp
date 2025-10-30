@@ -24,6 +24,8 @@ public class OrderTrackerController {
     private List<String> orderFiles;
     private OrderListener orderListener;
 
+    private VBox selectedFileBox = null;
+    private final String BASE_BOX_STYLE = "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #DFE8E8; -fx-cursor: hand;";
 
     @FXML
     public void initialize() {
@@ -105,7 +107,7 @@ public class OrderTrackerController {
     private VBox createFileDisplay(String fileName, Order order) {
         VBox fileBox = new VBox(6);
         fileBox.setPadding(new Insets(10));
-        fileBox.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #ffffff; -fx-cursor: hand;");
+        fileBox.setStyle(BASE_BOX_STYLE);
 
         // top row: Order #id: + status
         HBox topRow = new HBox(8);
@@ -156,6 +158,7 @@ public class OrderTrackerController {
 
         // click behavior: show details on right pane if parsed
         fileBox.setOnMouseClicked(evt -> {
+            selectFileBox(fileBox);
             if (order != null) showOrderDetails(order);
         });
 
@@ -178,6 +181,20 @@ public class OrderTrackerController {
         detailContainer.getChildren().addAll(header, details);
     }
 
+    //visual indicator for selected file box
+    private void selectFileBox(VBox box) {
+        if (selectedFileBox != null) {
+            selectedFileBox.setStyle(BASE_BOX_STYLE);
+        }
+        if (box != null) {
+            // selected order style around box
+            String SELECTED_BOX_STYLE = BASE_BOX_STYLE + " -fx-effect: dropshadow(gaussian, rgba(158,158,158,0.6), 14, 0.5, 0, 0); -fx-border-color: #9e9e9e; -fx-border-width: 2;";
+            box.setStyle(SELECTED_BOX_STYLE);
+            selectedFileBox = box;
+        } else {
+            selectedFileBox = null;
+        }
+    }
     //helper to format order types
     private String formatType(String raw) {
         if (raw == null) return "";
