@@ -45,6 +45,11 @@ public class Parser {
          return new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
     }
 
+    public static Order parseXMLOrder(File file) throws IOException {
+        // Placeholder
+        return null;
+    }
+
     /**
      * Static helper method
      * returns next order number and increments the counter
