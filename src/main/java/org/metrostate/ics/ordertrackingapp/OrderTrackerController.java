@@ -188,7 +188,7 @@ public class OrderTrackerController {
         }
         if (box != null) {
             // selected order style around box
-            String SELECTED_BOX_STYLE = BASE_BOX_STYLE + " -fx-effect: dropshadow(gaussian, rgba(158,158,158,0.6), 14, 0.5, 0, 0); -fx-border-color: #9e9e9e; -fx-border-width: 2;";
+            String SELECTED_BOX_STYLE = BASE_BOX_STYLE + " -fx-effect: dropshadow(gaussian, rgba(158,158,158,0.6), 14, 0.5, 0, 0); -fx-border-color: #9e9e9e; -fx-border-width: 1;";
             box.setStyle(SELECTED_BOX_STYLE);
             selectedFileBox = box;
         } else {
