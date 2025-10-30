@@ -3,7 +3,7 @@ package org.metrostate.ics.ordertrackingapp;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.metrostate.ics.ordertrackingapp.Status.incoming;
+import static org.metrostate.ics.ordertrackingapp.Status.*;
 
 /**
  * Represents a customer's order in the system.
@@ -21,7 +21,7 @@ public class Order {
      */
     public Order() {
         this.foodList = new ArrayList<>();
-        this.status = incoming;
+        this.status = waiting;
     }
 
     /**
@@ -41,7 +41,7 @@ public class Order {
         } else {
             this.foodList = new ArrayList<>();
         }
-        this.status = incoming;
+        this.status = waiting;
         this.totalPrice = sumPrice();
     }
 
@@ -177,8 +177,8 @@ public class Order {
         switch (status) {
             case completed:
                 return "Completed";
-            case incoming:
-                return "Incoming";
+            case waiting:
+                return "Waiting";
             case inProgress:
                 return "In Progress";
             case cancelled:

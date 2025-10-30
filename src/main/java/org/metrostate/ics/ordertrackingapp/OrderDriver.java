@@ -41,8 +41,8 @@ public class OrderDriver {
      * @param order The order to start
      */
     public void startOrder(Order order) {
-        // only start if it's incoming, otherwise do nothing
-        if (order.getStatus() == Status.incoming) {
+        // only start if it's waiting, otherwise do nothing
+        if (order.getStatus() == Status.waiting) {
             order.setStatus(Status.inProgress);
         }
     }

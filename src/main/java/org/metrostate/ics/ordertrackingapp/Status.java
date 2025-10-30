@@ -4,6 +4,6 @@ public enum Status {
     cancelled,
     completed,
     inProgress,
-    incoming
+    waiting
 
 }
