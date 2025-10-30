@@ -52,7 +52,7 @@ public class OrderListener implements Runnable {
         File directory = directoryPath.toFile();
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles((dir, name) ->
-                name.toLowerCase().endsWith(".json")); // || name.toLowerCase().endsWith(".xml"));
+                name.toLowerCase().endsWith(".json") || name.toLowerCase().endsWith(".xml"));
 
             if (files != null) {
                 for (File file : files) {
@@ -109,8 +109,8 @@ public class OrderListener implements Runnable {
                     Path filename = ev.context();
                     String fileName = filename.toString();
 
-                    if (fileName.toLowerCase().endsWith(".json")){ //||
-                        //fileName.toLowerCase().endsWith(".xml")) {
+                    if (fileName.toLowerCase().endsWith(".json") ||
+                        fileName.toLowerCase().endsWith(".xml")) {
 
                         // check if this is a new file
                         if (!processedFiles.contains(fileName)) {

@@ -70,13 +70,20 @@ public class OrderTrackerController {
             return;
         }
 
-        // parse the order (do IO off the FX thread), then update UI on FX thread
+        // parse the order on FX thread
         orderFiles.add(fileName);
         new Thread(() -> {
             Order order = null;
             if (fileName.toLowerCase().endsWith(".json")) {
                 try {
                     order = Parser.parseJSONOrder(file);
+                } catch (IOException e) {
+                    // leave null
+                }
+            }
+            if (fileName.toLowerCase().endsWith(".xml")) {
+                try {
+                    order = Parser.parseXMLOrder(file);
                 } catch (IOException e) {
                     // leave null
                 }
@@ -132,7 +139,7 @@ public class OrderTrackerController {
             typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
 
             // determine company from file extension
-            String company = fileName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop"; //no grubStop since xml files are excluded rn
+            String company = fileName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop";
             companyLabel.setText(company);
         } else {
             orderTitle.setText(fileName);
