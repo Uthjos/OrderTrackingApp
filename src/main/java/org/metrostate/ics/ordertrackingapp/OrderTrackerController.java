@@ -155,7 +155,9 @@ public class OrderTrackerController {
         fileBox.getChildren().addAll(topRow, secondRow);
 
         // click behavior: show details on right pane if parsed
-        fileBox.setOnMouseClicked(evt -> showOrderDetails(order));
+        fileBox.setOnMouseClicked(evt -> {
+            if (order != null) showOrderDetails(order);
+        });
 
         return fileBox;
     }
