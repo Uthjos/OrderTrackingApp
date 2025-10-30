@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * <a href="https://docs.oracle.com/javase/tutorial/essential/io/notification.html">...</a>
  * Monitors a directory for new order files (JSON and XML) using multithreading.
  * When a new file is detected, it notifies the registered listener.
  */
@@ -51,7 +52,7 @@ public class OrderListener implements Runnable {
         File directory = directoryPath.toFile();
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles((dir, name) ->
-                name.toLowerCase().endsWith(".json") || name.toLowerCase().endsWith(".xml"));
+                name.toLowerCase().endsWith(".json")); // || name.toLowerCase().endsWith(".xml"));
 
             if (files != null) {
                 for (File file : files) {
@@ -80,7 +81,7 @@ public class OrderListener implements Runnable {
      * <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/WatchService.html">...</a>
      */
     @Override
-    public void run() { // mostly from Oracle docs
+    public void run() { // run method mostly from Oracle docs
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();
             directoryPath.register(watchService,
@@ -108,8 +109,8 @@ public class OrderListener implements Runnable {
                     Path filename = ev.context();
                     String fileName = filename.toString();
 
-                    if (fileName.toLowerCase().endsWith(".json") ||
-                        fileName.toLowerCase().endsWith(".xml")) {
+                    if (fileName.toLowerCase().endsWith(".json")){ //||
+                        //fileName.toLowerCase().endsWith(".xml")) {
 
                         // check if this is a new file
                         if (!processedFiles.contains(fileName)) {
@@ -145,4 +146,3 @@ public class OrderListener implements Runnable {
         }
     }
 }
-
