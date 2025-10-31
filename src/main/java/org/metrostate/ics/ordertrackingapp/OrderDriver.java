@@ -114,7 +114,7 @@ public class OrderDriver {
             ordersArray.put(ordersJSON);
         }
 
-        String fileDirectory = "code/src/main/java/Export";
+        String fileDirectory = "export";
         String filePath = fileDirectory + "/" + fileName;
 
         File fileDir = new File(fileDirectory);
