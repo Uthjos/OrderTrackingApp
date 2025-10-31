@@ -214,14 +214,16 @@ public class Order {
         }
     }
 
-    public String displayType(){
+    public String displayType() {
         switch (this.type) {
-        case togo:
-            return "Togo";
-        case pickup:
-            return "Pickup";
-        default:
-            return "Error: No Type";
+            case togo:
+                return "Togo";
+            case pickup:
+                return "Pickup";
+            case delivery:
+                return "Delivery";
+            default:
+                return "Error: No Type";
         }
     }
 }

@@ -48,7 +48,8 @@ public class Parser {
         JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
         JSONObject orderJson = (JSONObject) jsonObject.get("order");
         orderDate = (long) orderJson.get("order_date");
-        orderType = (Type) orderJson.get("type");
+        String typeStr = ((String) orderJson.get("type"));
+        orderType = Type.valueOf(typeStr.toLowerCase());
         JSONArray itemArray = (JSONArray) orderJson.get("items");
         for (Object o : itemArray) {
             int quantity = (int) (long) ((JSONObject) o).get("quantity");
@@ -87,8 +88,8 @@ public class Parser {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) node;
                     orderDate = Long.parseLong(eElement.getAttribute("id"));
-                    orderType = Type.valueOf(eElement.getElementsByTagName("OrderType").item(0).getTextContent());
-
+                    String typeStr = eElement.getElementsByTagName("OrderType").item(0).getTextContent();
+                    orderType = Type.valueOf(typeStr.toLowerCase());
                 }
             }
 
