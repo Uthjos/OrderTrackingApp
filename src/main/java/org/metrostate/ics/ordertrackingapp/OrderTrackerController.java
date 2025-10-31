@@ -44,8 +44,20 @@ public class OrderTrackerController {
             scrollPane.setFitToWidth(true);
         }
         // Cancel buttons are disabled at startup
-        if (cancelButton != null) cancelButton.setDisable(true);
-        if (undoButton != null) undoButton.setDisable(true);
+        if (cancelButton != null){
+            cancelButton.setDisable(true);
+        }
+        if (undoButton != null){
+            undoButton.setDisable(true);
+        }
+
+        // Connects cancel and undo buttons to their action methods
+        if (cancelButton != null) {
+            cancelButton.setOnAction(e -> cancelSelectedOrder());
+        }
+        if (undoButton != null) {
+            undoButton.setOnAction(e -> undoCancel());
+        }
     }
 
     public void setOrderListener(OrderListener orderListener) {
