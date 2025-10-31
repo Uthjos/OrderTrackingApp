@@ -21,10 +21,18 @@ public class OrderTrackerController {
     @FXML
     private ScrollPane scrollPane;
 
+    @FXML
+    private Button cancelButton;
+
+    @FXML
+    private Button undoButton;
+
     private List<String> orderFiles;
     private OrderListener orderListener;
-
+    private OrderDriver orderDriver;
     private VBox selectedFileBox = null;
+    private Order selectedOrder = null;
+
     private final String BASE_BOX_STYLE = "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #DFE8E8; -fx-cursor: hand;";
 
     @FXML
@@ -35,11 +43,18 @@ public class OrderTrackerController {
         if (scrollPane != null) {
             scrollPane.setFitToWidth(true);
         }
+        // Cancel buttons are disabled at startup
+        if (cancelButton != null) cancelButton.setDisable(true);
+        if (undoButton != null) undoButton.setDisable(true);
     }
 
     public void setOrderListener(OrderListener orderListener) {
 
         this.orderListener = orderListener;
+    }
+
+    public void setOrderDriver(OrderDriver driver) {
+        this.orderDriver = driver;
     }
 
     /**
@@ -159,7 +174,11 @@ public class OrderTrackerController {
         // click behavior: show details on right pane if parsed
         fileBox.setOnMouseClicked(evt -> {
             selectFileBox(fileBox);
+            selectedOrder = order;
             if (order != null) showOrderDetails(order);
+            if (cancelButton != null) {
+                cancelButton.setDisable(order == null || order.getStatus() == Status.completed);
+            }
         });
 
         return fileBox;
@@ -223,5 +242,35 @@ public class OrderTrackerController {
         if (t.contains("pickup")) return "#2e7d32"; // green
         if (t.contains("delivery")) return "#1565c0"; // blue
         return "#444444";
+    }
+
+    private void cancelSelectedOrder() {
+        if (selectedOrder == null || orderDriver == null) return;
+
+        // Confirmation message
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Cancel Order");
+        alert.setHeaderText("Cancel order?");
+        alert.setContentText("Order #" + selectedOrder.getOrderID());
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                if (orderDriver.cancelOrderGUI(selectedOrder)) {
+                    ordersContainer.getChildren().remove(selectedFileBox);
+                    showOrderDetails(selectedOrder);
+                    // Enables undo button
+                    if (undoButton != null) undoButton.setDisable(false);
+                }
+            }
+        });
+    }
+    private void undoCancel() {
+        if (orderDriver == null) return;
+        orderDriver.undoCancel();
+        if (selectedOrder != null && selectedOrder.getStatus() != Status.cancelled) {
+            VBox box = createFileDisplay("Order #" + selectedOrder.getOrderID(), selectedOrder);
+            ordersContainer.getChildren().add(0, box);
+            if (undoButton != null) undoButton.setDisable(true);
+        }
     }
 }

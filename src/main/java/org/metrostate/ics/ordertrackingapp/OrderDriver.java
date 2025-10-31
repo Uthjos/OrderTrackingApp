@@ -16,6 +16,7 @@ import java.util.ArrayList;
  */
 public class OrderDriver {
     private List<Order> orders;
+    private Order lastCancelledOrder = null;
 
     /**
      * Constructs a new OrderDriver with empty lists for all orders, incomplete orders, and completed orders (empty constructor).
@@ -183,6 +184,22 @@ public class OrderDriver {
             }
         }
         return incompleteOrders;
+    }
+
+    public boolean cancelOrderGUI(Order order) {
+        if (order == null || order.getStatus() == Status.completed){
+            return false;
+        }
+        order.setStatus(Status.cancelled);
+        lastCancelledOrder = order;
+        return true;
+    }
+
+    public void undoCancel() {
+        if (lastCancelledOrder != null && lastCancelledOrder.getStatus() == Status.cancelled) {
+            lastCancelledOrder.setStatus(Status.waiting);
+            lastCancelledOrder = null;
+        }
     }
 
     /**
