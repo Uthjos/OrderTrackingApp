@@ -200,7 +200,7 @@ public class Order {
     }
 
     public String displayStatus() {
-        switch (status) {
+        switch (this.status) {
             case completed:
                 return "Completed";
             case waiting:
@@ -215,7 +215,7 @@ public class Order {
     }
 
     public String displayType(){
-        switch (type) {
+        switch (this.type) {
         case togo:
             return "Togo";
         case pickup:

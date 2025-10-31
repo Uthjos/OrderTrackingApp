@@ -135,7 +135,7 @@ public class OrderTrackerController {
             statusLabel.setStyle("-fx-text-fill: " + statusColor(order.getStatus()) + ";");
 
             // type formatting
-            String type = order.getType();
+            String type = String.valueOf(order.displayType());
             String formattedType = formatType(type);
             typeLabel.setText(formattedType);
             typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
