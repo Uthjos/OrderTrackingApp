@@ -1,16 +1,13 @@
 package org.metrostate.ics.ordertrackingapp;
 
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.*;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.FontPosture;
 import javafx.application.Platform;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,16 +15,30 @@ public class OrderTrackerController {
     @FXML
     private VBox ordersContainer;
 
+    @FXML
+    private VBox detailContainer;
+
+    @FXML
+    private ScrollPane scrollPane;
+
     private List<String> orderFiles;
     private OrderListener orderListener;
 
+    private VBox selectedFileBox = null;
+    private final String BASE_BOX_STYLE = "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #DFE8E8; -fx-cursor: hand;";
 
     @FXML
     public void initialize() {
         this.orderFiles = new ArrayList<>();
+        // keep default behavior if scrollPane is present
+        // refer to scrollPane to avoid unused-field warning; keep default behavior if null
+        if (scrollPane != null) {
+            scrollPane.setFitToWidth(true);
+        }
     }
 
     public void setOrderListener(OrderListener orderListener) {
+
         this.orderListener = orderListener;
     }
 
@@ -61,44 +72,156 @@ public class OrderTrackerController {
             return;
         }
 
+        // parse the order on FX thread
         orderFiles.add(fileName);
+        new Thread(() -> {
+            Order order = null;
+            if (fileName.toLowerCase().endsWith(".json")) {
+                try {
+                    order = Parser.parseJSONOrder(file);
+                } catch (IOException e) {
+                    // leave null
+                }
+            }
+            if (fileName.toLowerCase().endsWith(".xml")) {
+                try {
+                    order = Parser.parseXMLOrder(file);
+                } catch (IOException e) {
+                    // leave null
+                }
+            }
 
-        VBox fileBox = createFileDisplay(fileName);
-        // insert at top of the orders list
-        ordersContainer.getChildren().addFirst(fileBox);
+            final Order fOrder = order;
+            Platform.runLater(() -> {
+                VBox fileBox = createFileDisplay(fileName, fOrder);
+                // insert at top of the orders list
+                ordersContainer.getChildren().addFirst(fileBox);
+            });
+        }).start();
     }
 
     /**
-     * Creates a VBox display for a single order file
+     * Creates a VBox display for a single order
+     * show order id, status, and type
      */
-    private VBox createFileDisplay(String fileName) {
-        VBox fileBox = new VBox(5);
+    private VBox createFileDisplay(String fileName, Order order) {
+        VBox fileBox = new VBox(6);
         fileBox.setPadding(new Insets(10));
-        fileBox.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #f9f9f9;");
+        fileBox.setStyle(BASE_BOX_STYLE);
 
-        // file name label
-        Label fileNameLabel = new Label(fileName);
-        fileNameLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+        // top row: Order #id: + status
+        HBox topRow = new HBox(8);
+        Label orderTitle = new Label();
+        orderTitle.setFont(Font.font("System", FontWeight.BOLD, 14));
 
-        // order company label, determined by file extension
-        String orderCompany = fileName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop";
-        Label typeLabel = new Label("Company: " + orderCompany);
-        typeLabel.setFont(Font.font("System", 14));
+        Label statusLabel = new Label();
+        statusLabel.setFont(Font.font("System", FontWeight.BOLD, 13));
 
-        // color company
-        if (orderCompany.equals("FoodHub")) {
-            typeLabel.setStyle("-fx-text-fill: #2196f3;");
+        // second row: type  and company
+        HBox secondRow = new HBox(8);
+        Label typeLabel = new Label();
+        typeLabel.setFont(Font.font("System", 12));
+        Label companyLabel = new Label();
+        companyLabel.setFont(Font.font("System", 12));
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        if (order != null) {
+            orderTitle.setText("Order #" + order.getOrderID() + ":");
+
+            // status text and color
+            String statusText = order.displayStatus();
+            statusLabel.setText(statusText);
+            statusLabel.setStyle("-fx-text-fill: " + statusColor(order.getStatus()) + ";");
+
+            // type formatting
+            String type = order.getType();
+            String formattedType = formatType(type);
+            typeLabel.setText(formattedType);
+            typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
+
+            // determine company from file extension
+            String company = fileName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop";
+            companyLabel.setText(company);
         } else {
-            typeLabel.setStyle("-fx-text-fill: #ff9800;");
+            orderTitle.setText(fileName);
+            statusLabel.setText("");
+            typeLabel.setText("Parse error");
+            typeLabel.setFont(Font.font("System", FontPosture.ITALIC, 12));
+            companyLabel.setText("");
         }
 
-        // no parse yet
-        Label placeholderLabel = new Label("Pending parse implementation...");
-        placeholderLabel.setFont(Font.font("System", FontPosture.ITALIC, 12));
-        placeholderLabel.setStyle("-fx-text-fill: #666666;");
+        // add details to rows and add rows to the details box on the right
+        topRow.getChildren().addAll(orderTitle, statusLabel);
+        secondRow.getChildren().addAll(typeLabel, spacer, companyLabel);
+        fileBox.getChildren().addAll(topRow, secondRow);
 
-        fileBox.getChildren().addAll(fileNameLabel, typeLabel, placeholderLabel);
+        // click behavior: show details on right pane if parsed
+        fileBox.setOnMouseClicked(evt -> {
+            selectFileBox(fileBox);
+            if (order != null) showOrderDetails(order);
+        });
 
         return fileBox;
+    }
+
+    private void showOrderDetails(Order order) {
+        if (detailContainer == null) return;
+        detailContainer.getChildren().clear();
+
+        Label header = new Label("Order Details - #" + order.getOrderID());
+        header.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+        TextArea details = new TextArea(order.toString());
+        details.setEditable(false);
+        details.setWrapText(true);
+        details.setPrefWidth(300);
+        details.setPrefHeight(400);
+
+        detailContainer.getChildren().addAll(header, details);
+    }
+
+    //visual indicator for selected file box
+    private void selectFileBox(VBox box) {
+        if (selectedFileBox != null) {
+            selectedFileBox.setStyle(BASE_BOX_STYLE);
+        }
+        if (box != null) {
+            // selected order style around box
+            String SELECTED_BOX_STYLE = BASE_BOX_STYLE + " -fx-effect: dropshadow(gaussian, rgba(158,158,158,0.6), 14, 0.5, 0, 0); -fx-border-color: #9e9e9e; -fx-border-width: 1;";
+            box.setStyle(SELECTED_BOX_STYLE);
+            selectedFileBox = box;
+        } else {
+            selectedFileBox = null;
+        }
+    }
+    //helper to format order types
+    private String formatType(String raw) {
+        if (raw == null) return "";
+        String t = raw.trim().toLowerCase();
+        if (t.equals("togo")){
+            return "To-go";
+        }
+        // capitalize first letter
+        if (t.isEmpty()) return t;
+        return t.substring(0,1).toUpperCase() + t.substring(1);
+    }
+
+    // text color helpers
+    private String statusColor(Status status) {
+        if (status == null) return "#666666";
+        if (status == Status.completed) { return "#2e7d32"; } // green
+        if (status == Status.waiting) { return "#fb8c00"; } // orange
+        if (status == Status.inProgress) { return "#1565c0"; } // blue
+        if (status == Status.cancelled) { return "#c62828"; } // red
+        return "#666666";
+    }
+    private String typeColor(String formattedType) {
+        if (formattedType == null) return "#444444";
+        String t = formattedType.toLowerCase();
+        if (t.contains("to-go")) return "#6a1b9a"; // purple
+        if (t.contains("pickup")) return "#2e7d32"; // green
+        if (t.contains("delivery")) return "#1565c0"; // blue
+        return "#444444";
     }
 }

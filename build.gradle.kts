@@ -27,7 +27,7 @@ tasks.withType<JavaCompile> {
 
 application {
     mainModule.set("org.metrostate.ics.ordertrackingapp")
-    mainClass.set("org.metrostate.ics.ordertrackingapp.HelloApplication")
+    mainClass.set("org.metrostate.ics.ordertrackingapp.OrderTrackerApp")
 }
 
 javafx {

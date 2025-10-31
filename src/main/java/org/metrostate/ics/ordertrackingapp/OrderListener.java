@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * <a href="https://docs.oracle.com/javase/tutorial/essential/io/notification.html">...</a>
  * Monitors a directory for new order files (JSON and XML) using multithreading.
  * When a new file is detected, it notifies the registered listener.
  */
@@ -80,7 +81,7 @@ public class OrderListener implements Runnable {
      * <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/WatchService.html">...</a>
      */
     @Override
-    public void run() { // mostly from Oracle docs
+    public void run() { // run method mostly from Oracle docs
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();
             directoryPath.register(watchService,
@@ -145,4 +146,3 @@ public class OrderListener implements Runnable {
         }
     }
 }
-
