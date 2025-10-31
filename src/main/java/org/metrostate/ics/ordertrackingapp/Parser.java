@@ -69,7 +69,7 @@ public class Parser {
                 Node node = nList.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) node;
-                    orderDate = Long.parseLong(eElement.getElementsByTagName("name").item(0).getTextContent());
+                    orderDate = Long.parseLong(eElement.getAttribute("id"));
                     orderType = Type.valueOf(eElement.getElementsByTagName("OrderType").item(0).getTextContent());
 
                 }
@@ -84,7 +84,7 @@ public class Parser {
                 double price;
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) node;
-                    name = eElement.getElementsByTagName("name").item(0).getTextContent();
+                    name = eElement.getAttribute("type");
                     quantity = Integer.parseInt(eElement.getElementsByTagName("quantity").item(0).getTextContent());
                     price = Double.parseDouble(eElement.getElementsByTagName("price").item(0).getTextContent());
 
