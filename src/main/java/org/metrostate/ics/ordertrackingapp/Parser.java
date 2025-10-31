@@ -50,6 +50,14 @@ public class Parser {
         return new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
     }
 
+    /**
+     * parser method creates order object with data populated from given XML file.
+     * Generates a random orderID for the Order using getNextOrder() method
+     *
+     * @param file              XML file to be read
+     * @return                  Order object populated with data from the XML file
+     * @throws IOException      if file can't be read
+     */
     public static Order parseXMLOrder(File file) throws IOException {
         long orderDate = 0;
         Type orderType = null;
@@ -61,7 +69,7 @@ public class Parser {
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
 
-
+            //Reads and grabs order Date and Type
             NodeList nList = doc.getElementsByTagName("Order");
             for (int i = 0; i < nList.getLength(); i++) {
 
@@ -74,6 +82,7 @@ public class Parser {
                 }
             }
 
+            //Reads and creates FoodItems for foodItemList
             NodeList nodeList = doc.getElementsByTagName("Item");
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
@@ -92,9 +101,7 @@ public class Parser {
             }
 
 
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
 
