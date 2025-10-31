@@ -4,6 +4,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +32,13 @@ public class Parser {
      */
 	public static Order parseJSONOrder(File file) throws IOException {
         long orderDate;
-        String orderType;
+        Type orderType;
         List<FoodItem> foodItemList = new ArrayList<>();
 
         JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
         JSONObject orderJson = (JSONObject) jsonObject.get("order");
         orderDate = (long) orderJson.get("order_date");
-        orderType = (String) orderJson.get("type");
+        orderType = (Type) orderJson.get("type");
         JSONArray itemArray = (JSONArray) orderJson.get("items");
         for (Object o : itemArray) {
             int quantity = (int) (long) ((JSONObject) o).get("quantity");
@@ -41,6 +48,59 @@ public class Parser {
 
         }
         return new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
+    }
+
+    public static Order parseXMLOrder(File file) throws IOException {
+        long orderDate = 0;
+        Type orderType = null;
+        List<FoodItem> foodItemList = new ArrayList<>();
+
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            Element root = doc.getDocumentElement();
+
+            NodeList nList = doc.getElementsByTagName("order");
+            for (int i = 0; i < nList.getLength(); i++) {
+
+                Node node = nList.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) node;
+                    orderDate = Long.parseLong(eElement.getElementsByTagName("name").item(0).getTextContent());
+                    orderType = Type.valueOf(eElement.getElementsByTagName("OrderType").item(0).getTextContent());
+
+                }
+            }
+
+            NodeList nodeList = doc.getElementsByTagName("item");
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+
+                String name;
+                int quantity;
+                double price;
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) node;
+                    name = eElement.getElementsByTagName("name").item(0).getTextContent();
+                    quantity = Integer.parseInt(eElement.getElementsByTagName("quantity").item(0).getTextContent());
+                    price = Double.parseDouble(eElement.getElementsByTagName("price").item(0).getTextContent());
+
+                    foodItemList.add(new FoodItem(name, quantity, price));
+                }
+            }
+
+
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        return new Order (getNextOrderNumber(), orderType, orderDate, foodItemList);
     }
 
     /**
