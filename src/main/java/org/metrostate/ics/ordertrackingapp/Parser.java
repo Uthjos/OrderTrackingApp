@@ -61,9 +61,8 @@ public class Parser {
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
 
-            Element root = doc.getDocumentElement();
 
-            NodeList nList = doc.getElementsByTagName("order");
+            NodeList nList = doc.getElementsByTagName("Order");
             for (int i = 0; i < nList.getLength(); i++) {
 
                 Node node = nList.item(i);
@@ -75,7 +74,7 @@ public class Parser {
                 }
             }
 
-            NodeList nodeList = doc.getElementsByTagName("item");
+            NodeList nodeList = doc.getElementsByTagName("Item");
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
 
@@ -85,8 +84,8 @@ public class Parser {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) node;
                     name = eElement.getAttribute("type");
-                    quantity = Integer.parseInt(eElement.getElementsByTagName("quantity").item(0).getTextContent());
-                    price = Double.parseDouble(eElement.getElementsByTagName("price").item(0).getTextContent());
+                    quantity = Integer.parseInt(eElement.getElementsByTagName("Quantity").item(0).getTextContent());
+                    price = Double.parseDouble(eElement.getElementsByTagName("Price").item(0).getTextContent());
 
                     foodItemList.add(new FoodItem(name, quantity, price));
                 }
