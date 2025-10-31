@@ -22,6 +22,16 @@ import java.util.List;
  */
 public class Parser {
     private static int nextOrderNumber = 1;
+
+    /**
+     * set method that should only be called on when recalling current state
+     * from a failed closure, and adds 1.
+     * @param orderID   The maximum OrderID from current state
+     */
+    public static void setNextOrderNumber(int orderID) {
+        Parser.nextOrderNumber = orderID + 1;
+    }
+
     /**
      * Parser method creates order object with data populated from given JSON file.
      * Generates a random orderID for the Order.
@@ -117,6 +127,7 @@ public class Parser {
     private static int getNextOrderNumber(){
         return nextOrderNumber++;
     }
+
     /**
      * Main test method for the Parser class.
      * Uses a hardcoded JSON file to test the parser method.
