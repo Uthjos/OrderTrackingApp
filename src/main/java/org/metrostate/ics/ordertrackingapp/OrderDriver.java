@@ -165,6 +165,51 @@ public class OrderDriver {
         return true;
     }
 
+    public static boolean individualOrderExportJSON(String fileName, Order order){
+        JSONObject OrderJSON = new JSONObject();
+
+        OrderJSON.put("orderID", order.getOrderID());
+        OrderJSON.put("date", order.getDate());
+
+        OrderJSON.put("totalPrice", String.format("%.2f", order.getTotalPrice()));
+        OrderJSON.put("type", order.getType());
+        OrderJSON.put("status", order.getStatus());
+
+        JSONArray orderFoodsList = new JSONArray();
+        for (FoodItem food : order.getFoodList()) {
+            JSONObject foodJSON = new JSONObject();
+            foodJSON.put("name", food.getName());
+            foodJSON.put("quantity", food.getQuantity());
+            foodJSON.put("price", food.getPrice());
+            orderFoodsList.put(foodJSON);
+        }
+
+
+        String fileDirectory = "current_status";
+        String filePath = fileDirectory + "/" + fileName;
+
+        File fileDir = new File(fileDirectory);
+        if (!fileDir.exists()) {
+            boolean created = fileDir.mkdirs();
+            if (!created) {
+                System.out.println("Error creating directory: " + fileDirectory);
+                return false;
+            } else {
+                System.out.println("Directory created: " + fileDirectory);
+            }
+        }
+
+        try (FileWriter fw = new FileWriter(filePath)) {
+            fw.write(OrderJSON.toString(4)); // pretty print with indent of 4
+            fw.flush();
+        } catch (IOException e) {
+            return false;
+        }
+
+
+        return true;
+    }
+
     /**
      * Returns a list of all orders in the system.
      *
