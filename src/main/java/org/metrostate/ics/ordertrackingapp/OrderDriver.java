@@ -165,7 +165,7 @@ public class OrderDriver {
         return true;
     }
 
-    public static boolean individualOrderExportJSON(String fileName, Order order){
+    public static boolean orderExportJSON(String fileName, Order order){
         JSONObject OrderJSON = new JSONObject();
 
         OrderJSON.put("orderID", order.getOrderID());
@@ -184,6 +184,7 @@ public class OrderDriver {
             orderFoodsList.put(foodJSON);
         }
 
+        OrderJSON.put("foodList", orderFoodsList);
 
         String fileDirectory = "current_status";
         String filePath = fileDirectory + "/" + fileName;
