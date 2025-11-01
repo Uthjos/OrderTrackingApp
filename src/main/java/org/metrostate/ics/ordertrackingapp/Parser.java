@@ -46,15 +46,21 @@ public class Parser {
         List<FoodItem> foodItemList = new ArrayList<>();
 
         JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
-        JSONObject orderJson = (JSONObject) jsonObject.get("order");
-        orderDate = (long) orderJson.get("order_date");
-        String typeStr = ((String) orderJson.get("type"));
+        JSONObject orderJson = jsonObject.getJSONObject("order");
+        Object orderDateObj = orderJson.get("order_date");
+        if (orderDateObj instanceof Number) orderDate = ((Number) orderDateObj).longValue();
+        else orderDate = Long.parseLong(String.valueOf(orderDateObj));
+
+
+        String typeStr = orderJson.getString("type");
         orderType = Type.valueOf(typeStr.toLowerCase());
-        JSONArray itemArray = (JSONArray) orderJson.get("items");
+
+        JSONArray itemArray = orderJson.getJSONArray("items");
         for (Object o : itemArray) {
-            int quantity = (int) (long) ((JSONObject) o).get("quantity");
-            double price = (double) ((JSONObject) o).get("price");
-            String name = (String) ((JSONObject) o).get("name");
+            JSONObject item = (JSONObject) o;
+            int quantity = ((Number) item.get("quantity")).intValue();
+            double price = ((Number) item.get("price")).doubleValue();
+            String name = item.getString("name");
             foodItemList.add(new FoodItem(name, quantity, price));
 
         }
