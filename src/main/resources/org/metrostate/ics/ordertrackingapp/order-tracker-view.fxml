@@ -22,7 +22,6 @@
             </font>
         </Label>
 
-        <!-- Spacer to push exit button to the right -->
         <Region HBox.hgrow="ALWAYS" />
 
         <Button onAction="#exitApplication" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-cursor: hand;" text="Exit">
@@ -55,6 +54,15 @@
                     <Font name="System Bold" size="16.0" />
                 </font>
             </Label>
+
         </VBox>
+    </HBox>
+
+    <!-- Buttons below the detail container -->
+    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+        <Button fx:id="cancelButton" text="Cancel" style="-fx-background-color: #9e9e9e; -fx-text-fill: white; -fx-cursor: hand;" visible="false" />
+        <Button fx:id="undoButton" text="Un-cancel" style="-fx-background-color: #607d8b; -fx-text-fill: white; -fx-cursor: hand;" visible="false" />
+        <Button fx:id="startButton" text="Start" style="-fx-background-color: #1976d2; -fx-text-fill: white; -fx-cursor: hand;" visible="false" />
+        <Button fx:id="completeButton" text="Complete" style="-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-cursor: hand;" visible="false" />
     </HBox>
 </VBox>

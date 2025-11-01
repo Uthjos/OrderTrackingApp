@@ -18,6 +18,37 @@ public class OrderDriver {
     private List<Order> orders;
     private Order lastCancelledOrder = null;
 
+    // listener to watch for changes to an order's status -- in order to update GUI when buttons are clicked
+    public interface OrderChangeListener {
+        void orderAdded(Order order);
+        void orderChanged(Order order);
+    }
+
+    private final List<OrderChangeListener> listeners = new ArrayList<>();
+
+    public void addListener(OrderChangeListener l) {
+        if (l == null) return;
+        listeners.add(l);
+    }
+
+    public void removeListener(OrderChangeListener l) {
+        listeners.remove(l);
+    }
+
+    //for adding new order to GUI
+    private void notifyOrderAdded(Order o) {
+        for (OrderChangeListener l : new ArrayList<>(listeners)) {
+            try { l.orderAdded(o); } catch (Exception ignored) {}
+        }
+    }
+
+    //for updating order status in GUI
+    private void notifyOrderChanged(Order o) {
+        for (OrderChangeListener l : new ArrayList<>(listeners)) {
+            try { l.orderChanged(o); } catch (Exception ignored) {}
+        }
+    }
+
     /**
      * Constructs a new OrderDriver with empty lists for all orders, incomplete orders, and completed orders (empty constructor).
      */
@@ -33,6 +64,7 @@ public class OrderDriver {
      */
     public void addOrder(Order order) {
         orders.add(order);
+        notifyOrderAdded(order);
     }
 
     /**
@@ -45,6 +77,7 @@ public class OrderDriver {
         // only start if it's waiting, otherwise do nothing
         if (order.getStatus() == Status.waiting) {
             order.setStatus(Status.inProgress);
+            notifyOrderChanged(order);
         }
     }
 
@@ -58,23 +91,8 @@ public class OrderDriver {
         // only complete if it's in progress, otherwise do nothing
         if (order.getStatus() == Status.inProgress) {
             order.setStatus(Status.completed);
+            notifyOrderChanged(order);
         }
-    }
-
-
-    /**
-     * Finds an order by its ID and returns its details as a formatted string.
-     *
-     * @param orderID The unique ID of the order
-     * @return A string representation of the order, or "Order not found" if no order matches the ID
-     */
-    public String displayOrder(int orderID) {
-        for (Order order : orders) {
-            if (order.getOrderID() == orderID) {
-                return order.toString();
-            }
-        }
-        return "Order not found.";
     }
 
     /**
@@ -192,12 +210,16 @@ public class OrderDriver {
         }
         order.setStatus(Status.cancelled);
         lastCancelledOrder = order;
+        notifyOrderChanged(order);
         return true;
     }
 
     public void undoCancel() {
         if (lastCancelledOrder != null && lastCancelledOrder.getStatus() == Status.cancelled) {
-            lastCancelledOrder.setStatus(Status.waiting);
+            Order prev = lastCancelledOrder;
+            prev.setStatus(Status.waiting);
+            // notify listeners about the change to the previously cancelled order
+            notifyOrderChanged(prev);
             lastCancelledOrder = null;
         }
     }
@@ -209,6 +231,22 @@ public class OrderDriver {
      */
     public void cancelOrder(Order order) {
         order.setStatus(Status.cancelled);
+        notifyOrderChanged(order);
+    }
+
+    /**
+     * Un-cancel a specific order (set status back to waiting) if it is currently cancelled.
+     * Returns true if the order was un-cancelled, false otherwise.
+     */
+    public boolean uncancelOrder(Order order) {
+        if (order == null) return false;
+        if (order.getStatus() != Status.cancelled) return false;
+        order.setStatus(Status.waiting);
+        if (lastCancelledOrder == order) {
+            lastCancelledOrder = null;
+        }
+        notifyOrderChanged(order);
+        return true;
     }
 
     /**
