@@ -141,6 +141,7 @@ public class OrderDriver {
             fw.write(OrderJSON.toString(4)); // pretty print with indent of 4
             fw.flush();
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
