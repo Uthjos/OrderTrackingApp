@@ -126,8 +126,7 @@ public class Parser {
         return new Order (getNextOrderNumber(), orderType, orderDate, foodItemList);
     }
 
-    public static Order parseCurrentState(File file) throws IOException {
-        Order currentState;
+    public static Order parseExportedFile(File file) throws IOException {
         int orderID;
         long date;
         double totalPrice;
@@ -143,23 +142,15 @@ public class Parser {
         orderType = (Type) orderJson.get("order_type");
         status = (Status) orderJson.get("status");
 
-        JSONArray foodItemArray = (JSONArray) orderJson.get("items");
-        for (Object o : foodItemArray) {
+        JSONArray foodItemArrayJSON = (JSONArray) orderJson.get("items");
+        for (Object o : foodItemArrayJSON) {
             int quantity = (int) (long) ((JSONObject) o).get("quantity");
             double price = (double) ((JSONObject) o).get("price");
             String name = (String) ((JSONObject) o).get("name");
             foodItemList.add(new FoodItem(name, quantity, price));
         }
 
-        currentState = new Order(orderID, orderType, date, foodItemList);
-
-        for (JSONObject JSONO : foodItemArray){
-
-        }
-
-
-
-        return currentState;
+        return new Order(orderID, date, totalPrice, orderType , status, foodItemList);
     }
 
     /**
