@@ -35,7 +35,13 @@
          <Font name="System Bold Italic" size="13.0" />
       </font>
    </Label>
-   <Label text="Click order to view details" />
+
+    <HBox spacing="10.0">
+        <ComboBox fx:id="statusFilter" prefWidth="120.0" />
+        <ComboBox fx:id="typeFilter" prefWidth="120.0" />
+    </HBox>
+
+    <Label text="Click order to view details" />
 <!-- split area: left = scrollable list of orders, right = details pane -->
     <HBox spacing="10.0" VBox.vgrow="ALWAYS">
         <!-- left: scrollable area for orders. populated in OrderTrackerController -->

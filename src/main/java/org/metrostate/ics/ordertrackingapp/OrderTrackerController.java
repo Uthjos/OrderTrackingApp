@@ -38,6 +38,9 @@ public class OrderTrackerController {
     @FXML
     private ComboBox<String> typeFilter;
 
+    @FXML
+    private VBox filterContainer;
+
     private List<String> orderFiles;
     private OrderListener orderListener;
     private OrderDriver orderDriver;
@@ -104,6 +107,13 @@ public class OrderTrackerController {
             }
             typeFilter.setValue("All");
             typeFilter.setOnAction(e -> applyFilters());
+        }
+        if (filterContainer != null) {
+            filterContainer.getChildren().clear();
+            HBox filtersBox = new HBox(10);
+            filtersBox.getChildren().addAll(statusFilter, typeFilter);
+
+            filterContainer.getChildren().addAll(filtersBox, ordersContainer);
         }
     }
 
