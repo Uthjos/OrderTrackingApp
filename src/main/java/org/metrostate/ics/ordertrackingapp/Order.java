@@ -46,6 +46,26 @@ public class Order {
     }
 
     /**
+     * Constructor that is used to restore previous state after
+     * failure to close
+     *
+     * @param orderId
+     * @param date
+     * @param totalPrice
+     * @param type
+     * @param status
+     * @param foodList
+     */
+    public Order(int orderId, long date, double totalPrice, Type type, Status status, List<FoodItem> foodList) {
+        this.orderId = orderId;
+        this.date = date;
+        this.totalPrice = totalPrice;
+        this.type = type;
+        this.status = status;
+        this.foodList = new ArrayList<>(foodList);
+    }
+
+    /**
      * Gets the date when the order was placed.
      *
      * @return The order date

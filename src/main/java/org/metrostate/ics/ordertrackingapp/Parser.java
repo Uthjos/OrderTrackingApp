@@ -126,6 +126,42 @@ public class Parser {
         return new Order (getNextOrderNumber(), orderType, orderDate, foodItemList);
     }
 
+    public static Order parseCurrentState(File file) throws IOException {
+        Order currentState;
+        int orderID;
+        long date;
+        double totalPrice;
+        Type orderType;
+        Status status;
+        List<FoodItem> foodItemList = new ArrayList<>();
+
+        JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
+        JSONObject orderJson = (JSONObject) jsonObject.get("order");
+        orderID = (int) orderJson.get("id");
+        date = (long) orderJson.get("date");
+        totalPrice = (double) orderJson.get("total_price");
+        orderType = (Type) orderJson.get("order_type");
+        status = (Status) orderJson.get("status");
+
+        JSONArray foodItemArray = (JSONArray) orderJson.get("items");
+        for (Object o : foodItemArray) {
+            int quantity = (int) (long) ((JSONObject) o).get("quantity");
+            double price = (double) ((JSONObject) o).get("price");
+            String name = (String) ((JSONObject) o).get("name");
+            foodItemList.add(new FoodItem(name, quantity, price));
+        }
+
+        currentState = new Order(orderID, orderType, date, foodItemList);
+
+        for (JSONObject JSONO : foodItemArray){
+
+        }
+
+
+
+        return currentState;
+    }
+
     /**
      * Static helper method
      * returns next order number and increments the counter
