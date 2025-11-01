@@ -95,77 +95,14 @@ public class OrderDriver {
         }
     }
 
-    /**
-     * Creates a JSONArray of the Orders list
-     * and puts them in a file in the directory code/src/main/java/export.
-     * note: export is not pretty to do that we need libraries GSON or Jackson
-     *
-     * @param fileName    The name of the file to export to
-     * @param orderDriver The OrderDriver instance containing all orders
-     * @return true if the export succeeds, false otherwise
-     */
-    public static boolean exportOrdersToJSON(String fileName, OrderDriver orderDriver) {
 
-        JSONArray ordersArray = new JSONArray();
-        if (orderDriver.getOrders().isEmpty()) {
-            return false; // no orders to export
+    public static void orderExportJSONAll (OrderDriver orderDriver, String fileDirectory) {
+        for (Order order : orderDriver.orders) {
+            orderExportJSON(order, fileDirectory);
         }
-        for (Order order : orderDriver.getOrders()) {
-            JSONObject ordersJSON = new JSONObject();
-            ordersJSON.put("orderID", order.getOrderID());
-            ordersJSON.put("status", order.getStatus());
-            ordersJSON.put("totalPrice", String.format("%.2f", order.getTotalPrice()));
-            ordersJSON.put("date", order.getDate());
-            ordersJSON.put("type", order.getType());
-            ordersJSON.put("completeTime", System.currentTimeMillis());
-
-            JSONArray orderFoodsList = new JSONArray();
-            for (FoodItem food : order.getFoodList()) {
-                JSONObject foodJSON = new JSONObject();
-                foodJSON.put("name", food.getName());
-                foodJSON.put("quantity", food.getQuantity());
-                foodJSON.put("price", food.getPrice());
-                orderFoodsList.put(foodJSON);
-            }
-
-            ordersJSON.put("foodList", orderFoodsList);
-
-            ordersArray.put(ordersJSON);
-        }
-
-        String fileDirectory = "export";
-        String filePath = fileDirectory + "/" + fileName;
-
-        File fileDir = new File(fileDirectory);
-        if (!fileDir.exists()) {
-            boolean created = fileDir.mkdirs();
-            if (!created) {
-                System.out.println("Error creating directory: " + fileDirectory);
-                return false;
-            } else {
-                System.out.println("Directory created: " + fileDirectory);
-            }
-        }
-
-        // write ordersArray to a file as a single JSON array, with newlines between objects
-        try (FileWriter fw = new FileWriter(filePath)) {
-            fw.write("[\n");
-            for (int i = 0; i < ordersArray.length(); i++) {
-                fw.write(ordersArray.get(i).toString());
-                if (i < ordersArray.length() - 1) {
-                    fw.write(",\n");
-                }
-            }
-            fw.write("\n]");
-            fw.flush();
-        } catch (IOException e) {
-            return false;
-        }
-
-        return true;
     }
 
-    public static boolean orderExportJSON(String fileName, Order order){
+    public static void orderExportJSON(Order order, String fileDirectory) {
         JSONObject OrderJSON = new JSONObject();
 
         OrderJSON.put("orderID", order.getOrderID());
@@ -186,17 +123,17 @@ public class OrderDriver {
 
         OrderJSON.put("foodList", orderFoodsList);
 
-        String fileDirectory = "current_status";
-        String filePath = fileDirectory + "/" + fileName;
+        String fileNameDir = "order" + order.getOrderID() + "_" + order.getDate() + ".json";
+        String filePath = fileDirectory + "/" + fileNameDir;
 
         File fileDir = new File(fileDirectory);
         if (!fileDir.exists()) {
             boolean created = fileDir.mkdirs();
             if (!created) {
-                System.out.println("Error creating directory: " + fileDirectory);
-                return false;
+                System.out.println("Error creating directory: " + filePath);
+                return;
             } else {
-                System.out.println("Directory created: " + fileDirectory);
+                System.out.println("Directory created: " + filePath);
             }
         }
 
@@ -204,11 +141,7 @@ public class OrderDriver {
             fw.write(OrderJSON.toString(4)); // pretty print with indent of 4
             fw.flush();
         } catch (IOException e) {
-            return false;
         }
-
-
-        return true;
     }
 
     /**
