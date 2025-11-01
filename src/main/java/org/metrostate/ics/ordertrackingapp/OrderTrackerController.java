@@ -111,9 +111,11 @@ public class OrderTrackerController {
         if (filterContainer != null) {
             filterContainer.getChildren().clear();
             HBox filtersBox = new HBox(10);
+            //filtersBox.getChildren().addAll(statusFilter, typeFilter);
+            //filterContainer.getChildren().add(filtersBox);
+            //filterContainer.getChildren().addAll(filtersBox, ordersContainer);
             filtersBox.getChildren().addAll(statusFilter, typeFilter);
-
-            filterContainer.getChildren().addAll(filtersBox, ordersContainer);
+            filterContainer.getChildren().add(filtersBox);
         }
     }
 
