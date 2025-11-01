@@ -19,7 +19,7 @@ This project is a FoodHub Order Management System with a graphical user interfac
 ## How to Run
 
 - Open the project directory.
-- Run Main.java to launch the GUI.
+- Run Launcher.java to launch the GUI.
 - Import at least one order JSON to use functionality.
 
 ## Dependencies
