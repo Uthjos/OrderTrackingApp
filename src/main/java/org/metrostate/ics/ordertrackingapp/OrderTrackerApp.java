@@ -23,6 +23,9 @@ public class OrderTrackerApp extends Application {
 
         OrderTrackerController controller = fxmlLoader.getController();
 
+        OrderDriver driver = new OrderDriver();
+        controller.setOrderDriver(driver);
+
         // watch the testOrders directory
         String testOrdersPath = getTestOrdersPath();
         orderListener = new OrderListener(testOrdersPath, controller::addOrderFile);

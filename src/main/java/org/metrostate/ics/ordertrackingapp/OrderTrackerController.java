@@ -8,8 +8,7 @@ import javafx.geometry.Insets;
 import javafx.application.Platform;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class OrderTrackerController {
     @FXML
@@ -28,6 +27,12 @@ public class OrderTrackerController {
     private Button undoButton;
 
     @FXML
+    private Button startButton;
+
+    @FXML
+    private Button completeButton;
+
+    @FXML
     private ComboBox<String> statusFilter;
 
     @FXML
@@ -36,8 +41,9 @@ public class OrderTrackerController {
     private List<String> orderFiles;
     private OrderListener orderListener;
     private OrderDriver orderDriver;
-    private VBox selectedFileBox = null;
+    private VBox selectedOrderBox = null;
     private Order selectedOrder = null;
+    private OrderDriver.OrderChangeListener driverListener = null;
 
     private final String BASE_BOX_STYLE = "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #DFE8E8; -fx-cursor: hand;";
 
@@ -52,9 +58,24 @@ public class OrderTrackerController {
         // Cancel buttons are disabled at startup
         if (cancelButton != null){
             cancelButton.setDisable(true);
+            cancelButton.setVisible(false);
+            // so it doesnt take up space when hidden
+            cancelButton.setManaged(false);
         }
         if (undoButton != null){
             undoButton.setDisable(true);
+            undoButton.setVisible(false);
+            undoButton.setManaged(false);
+        }
+        if (startButton != null) {
+            startButton.setVisible(false);
+            startButton.setManaged(false);
+            startButton.setOnAction(e -> startSelectedOrder());
+        }
+        if (completeButton != null) {
+            completeButton.setVisible(false);
+            completeButton.setManaged(false);
+            completeButton.setOnAction(e -> completeSelectedOrder());
         }
 
         // Connects cancel and undo buttons to their action methods
@@ -93,6 +114,33 @@ public class OrderTrackerController {
 
     public void setOrderDriver(OrderDriver driver) {
         this.orderDriver = driver;
+        // register a listener so the controller updates immediately when the model changes
+        if (this.orderDriver != null) {
+            driverListener = new OrderDriver.OrderChangeListener() {
+                @Override
+                public void orderAdded(Order order) {
+                    // orders on seperate thread - update UI on JavaFX thread
+                    Platform.runLater(() -> applyFilters());
+                }
+
+                @Override
+                public void orderChanged(Order order) {
+                    //another thread - update UI on JavaFX thread
+                    Platform.runLater(() -> {
+                        applyFilters();
+                        VBox box = findOrderBoxForOrder(order);
+                        if (box != null) refreshOrderBox(box, order);
+                        // if the changed order is the one currently selected, update details/buttons
+                        if (selectedOrder != null && order.getOrderID() == selectedOrder.getOrderID()) {
+                            selectedOrder = order;
+                            showOrderDetails(selectedOrder);
+                            updateButtonsVisibility(selectedOrder);
+                        }
+                    });
+                }
+            };
+            this.orderDriver.addListener(driverListener);
+        }
     }
 
     /**
@@ -104,6 +152,9 @@ public class OrderTrackerController {
         // stop the OrderListener thread
         if (orderListener != null) {
             orderListener.stop();
+        }
+        if (orderDriver != null && driverListener != null) {
+            orderDriver.removeListener(driverListener);
         }
         Platform.exit();
         System.exit(0);
@@ -125,7 +176,7 @@ public class OrderTrackerController {
             return;
         }
 
-        // parse the order on FX thread
+        // parse the order on a background thread
         orderFiles.add(fileName);
         new Thread(() -> {
             Order order = null;
@@ -146,10 +197,13 @@ public class OrderTrackerController {
 
             final Order fOrder = order;
             Platform.runLater(() -> {
-                VBox fileBox = createFileDisplay(fileName, fOrder);
-                // insert at top of the orders list
-                ordersContainer.getChildren().addFirst(fileBox);
-                applyFilters();
+                if (fOrder != null && orderDriver != null) {
+                    orderDriver.addOrder(fOrder);
+                    applyFilters();
+                } else {
+                    VBox orderBox = createOrderBox(fileName, null);
+                    ordersContainer.getChildren().addFirst(orderBox);
+                }
             });
         }).start();
     }
@@ -158,10 +212,10 @@ public class OrderTrackerController {
      * Creates a VBox display for a single order
      * show order id, status, and type
      */
-    private VBox createFileDisplay(String fileName, Order order) {
-        VBox fileBox = new VBox(6);
-        fileBox.setPadding(new Insets(10));
-        fileBox.setStyle(BASE_BOX_STYLE);
+    private VBox createOrderBox(String sourceName, Order order) {
+        VBox orderBox = new VBox(6);
+        orderBox.setPadding(new Insets(10));
+        orderBox.setStyle(BASE_BOX_STYLE);
 
         // top row: Order #id: + status
         HBox topRow = new HBox(8);
@@ -194,11 +248,13 @@ public class OrderTrackerController {
             typeLabel.setText(formattedType);
             typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
 
-            // determine company from file extension
-            String company = fileName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop";
+            // determine company from sourceName extension
+            String company = sourceName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop";
             companyLabel.setText(company);
+            // store order id
+            orderBox.setUserData(order.getOrderID());
         } else {
-            orderTitle.setText(fileName);
+            orderTitle.setText(sourceName);
             statusLabel.setText("");
             typeLabel.setText("Parse error");
             typeLabel.setFont(Font.font("System", FontPosture.ITALIC, 12));
@@ -208,19 +264,52 @@ public class OrderTrackerController {
         // add details to rows and add rows to the details box on the right
         topRow.getChildren().addAll(orderTitle, statusLabel);
         secondRow.getChildren().addAll(typeLabel, spacer, companyLabel);
-        fileBox.getChildren().addAll(topRow, secondRow);
+        orderBox.getChildren().addAll(topRow, secondRow);
 
         // click behavior: show details on right pane if parsed
-        fileBox.setOnMouseClicked(evt -> {
-            selectFileBox(fileBox);
+        orderBox.setOnMouseClicked(evt -> {
+            selectOrderBox(orderBox);
             selectedOrder = order;
             if (order != null) showOrderDetails(order);
+            // hide Cancel button when order is completed or cancelled
             if (cancelButton != null) {
-                cancelButton.setDisable(order == null || order.getStatus() == Status.completed);
+                cancelButton.setDisable(order == null || order.getStatus() == Status.completed || order.getStatus() == Status.cancelled);
             }
+            updateButtonsVisibility(order);
         });
 
-        return fileBox;
+        return orderBox;
+    }
+
+    private void updateButtonsVisibility(Order order) {
+        if (cancelButton != null) {
+            // hide the cancel button when order is completed or cancelled
+            boolean showCancel = order != null && order.getStatus() != Status.completed && order.getStatus() != Status.cancelled;
+            cancelButton.setVisible(showCancel);
+            cancelButton.setManaged(showCancel);
+            cancelButton.setDisable(order == null || order.getStatus() == Status.completed || order.getStatus() == Status.cancelled);
+        }
+        if (undoButton != null) {
+            // show the Un-cancel button only when the selected order is cancelled
+            boolean showUncancel = order != null && order.getStatus() == Status.cancelled;
+            undoButton.setVisible(showUncancel);
+            undoButton.setManaged(showUncancel);
+            undoButton.setDisable(!showUncancel);
+        }
+        if (startButton != null) {
+            // only when waiting
+            boolean showStart = order != null && order.getStatus() == Status.waiting;
+            startButton.setVisible(showStart);
+            startButton.setManaged(showStart);
+            startButton.setDisable(!showStart);
+        }
+        if (completeButton != null) {
+            // only when inProgress
+            boolean showComplete = order != null && order.getStatus() == Status.inProgress;
+            completeButton.setVisible(showComplete);
+            completeButton.setManaged(showComplete);
+            completeButton.setDisable(!showComplete);
+        }
     }
 
     private void showOrderDetails(Order order) {
@@ -239,20 +328,22 @@ public class OrderTrackerController {
         detailContainer.getChildren().addAll(header, details);
     }
 
-    //visual indicator for selected file box
-    private void selectFileBox(VBox box) {
-        if (selectedFileBox != null) {
-            selectedFileBox.setStyle(BASE_BOX_STYLE);
+    //visual indicator for selected order box
+    private void selectOrderBox(VBox box) {
+        if (selectedOrderBox != null) {
+            selectedOrderBox.setStyle(BASE_BOX_STYLE);
         }
         if (box != null) {
             // selected order style around box
             String SELECTED_BOX_STYLE = BASE_BOX_STYLE + " -fx-effect: dropshadow(gaussian, rgba(158,158,158,0.6), 14, 0.5, 0, 0); -fx-border-color: #9e9e9e; -fx-border-width: 1;";
             box.setStyle(SELECTED_BOX_STYLE);
-            selectedFileBox = box;
+            selectedOrderBox = box;
         } else {
-            selectedFileBox = null;
+            selectedOrderBox = null;
+            updateButtonsVisibility(null);
         }
     }
+
     //helper to format order types
     private String formatType(String raw) {
         if (raw == null) return "";
@@ -295,10 +386,15 @@ public class OrderTrackerController {
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 if (orderDriver.cancelOrderGUI(selectedOrder)) {
-                    ordersContainer.getChildren().remove(selectedFileBox);
-                    showOrderDetails(selectedOrder);
-                    // Enables undo button
-                    if (undoButton != null) undoButton.setDisable(false);
+                    // rebuild the list so UI reflects the current state
+                    Platform.runLater(() -> {
+                        applyFilters();
+                        showOrderDetails(selectedOrder);
+                        // refresh the left-side box for this order
+                        VBox found = findOrderBoxForOrder(selectedOrder);
+                        if (found != null) refreshOrderBox(found, selectedOrder);
+                        updateButtonsVisibility(selectedOrder);
+                    });
                 }
             }
             else {
@@ -311,16 +407,154 @@ public class OrderTrackerController {
             }
         });
     }
+
     private void undoCancel() {
-        if (orderDriver == null) return;
-        orderDriver.undoCancel();
-        if (selectedOrder != null && selectedOrder.getStatus() != Status.cancelled) {
-            VBox box = createFileDisplay("Order #" + selectedOrder.getOrderID(), selectedOrder);
-            ordersContainer.getChildren().add(0, box);
-            if (undoButton != null) undoButton.setDisable(true);
-        }
+        if (orderDriver == null || selectedOrder == null) return;
+        boolean success = orderDriver.uncancelOrder(selectedOrder);
+        // refresh UI
+        Platform.runLater(() -> {
+            if (success) {
+                applyFilters();
+                VBox found = findOrderBoxForOrder(selectedOrder);
+                if (found != null) refreshOrderBox(found, selectedOrder);
+                showOrderDetails(selectedOrder);
+            }
+            updateButtonsVisibility(selectedOrder);
+        });
     }
 
+    // start the selected order (waiting -> inProgress)
+    private void startSelectedOrder() {
+        if (selectedOrder == null || orderDriver == null) return;
+        orderDriver.startOrder(selectedOrder);
+        showOrderDetails(selectedOrder);
+        updateButtonsVisibility(selectedOrder);
+
+        // replace the corresponding box in the orders list with updated one
+        if (ordersContainer != null) {
+            VBox oldBox = (selectedOrderBox != null) ? selectedOrderBox : findOrderBoxForOrder(selectedOrder);
+            if (oldBox != null) {
+                int idx = ordersContainer.getChildren().indexOf(oldBox);
+                VBox newBox = createOrderBox("Order #" + selectedOrder.getOrderID(), selectedOrder);
+                if (idx >= 0) {
+                    ordersContainer.getChildren().set(idx, newBox);
+                } else {
+                    ordersContainer.getChildren().remove(oldBox);
+                    ordersContainer.getChildren().addFirst(newBox);
+                }
+                selectedOrderBox = newBox;
+                selectOrderBox(newBox);
+            }
+        }
+        VBox found = findOrderBoxForOrder(selectedOrder);
+        if (found != null) refreshOrderBox(found, selectedOrder);
+        Platform.runLater(this::applyFilters);
+    }
+
+    // complete the selected order (inProgress -> completed)
+    private void completeSelectedOrder() {
+        if (selectedOrder == null || orderDriver == null) return;
+        orderDriver.completeOrder(selectedOrder);
+        showOrderDetails(selectedOrder);
+        updateButtonsVisibility(selectedOrder);
+
+        // refresh
+        if (ordersContainer != null) {
+            VBox oldBox = (selectedOrderBox != null) ? selectedOrderBox : findOrderBoxForOrder(selectedOrder);
+            if (oldBox != null) {
+                int idx = ordersContainer.getChildren().indexOf(oldBox);
+                VBox newBox = createOrderBox("Order #" + selectedOrder.getOrderID(), selectedOrder);
+                if (idx >= 0) {
+                    ordersContainer.getChildren().set(idx, newBox);
+                } else {
+                    ordersContainer.getChildren().remove(oldBox);
+                    ordersContainer.getChildren().addFirst(newBox);
+                }
+                selectedOrderBox = newBox;
+                selectOrderBox(newBox);
+            }
+        }
+        VBox found = findOrderBoxForOrder(selectedOrder);
+        if (found != null) refreshOrderBox(found, selectedOrder);
+        Platform.runLater(this::applyFilters);
+    }
+
+    // update the labels inside a orderBox (left-side list) to reflect current order state
+    private void refreshOrderBox(VBox orderBox, Order order) {
+        if (order == null) return;
+        if (orderBox == null) {
+            orderBox = findOrderBoxForOrder(order);
+        }
+        if (orderBox == null) return;
+
+        final VBox boxToUpdate = orderBox;
+        final Order orderCopy = order;
+        // do UI updates on the JavaFX Application Thread
+        Platform.runLater(() -> {
+            try {
+                // topRow: [orderTitle, statusLabel]
+                if (!boxToUpdate.getChildren().isEmpty()) {
+                    if (boxToUpdate.getChildren().get(0) instanceof HBox topRow) {
+                        if (topRow.getChildren().size() > 1 && topRow.getChildren().get(1) instanceof Label statusLabel) {
+                            statusLabel.setText(orderCopy.displayStatus());
+                            statusLabel.setStyle("-fx-text-fill: " + statusColor(orderCopy.getStatus()) + ";");
+                        }
+                    }
+
+                    // secondRow: [typeLabel, spacer, companyLabel]
+                    if (boxToUpdate.getChildren().size() > 1 && boxToUpdate.getChildren().get(1) instanceof HBox secondRow) {
+                        if (!secondRow.getChildren().isEmpty() && secondRow.getChildren().getFirst() instanceof Label typeLabel) {
+                            String formattedType = formatType(String.valueOf(orderCopy.displayType()));
+                            typeLabel.setText(formattedType);
+                            typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
+                        }
+                    }
+                }
+                if (boxToUpdate != selectedOrderBox) {
+                    selectOrderBox(boxToUpdate);
+                } else {
+                    boxToUpdate.setStyle(BASE_BOX_STYLE + " -fx-effect: dropshadow(gaussian, rgba(158,158,158,0.6), 14, 0.5, 0, 0); -fx-border-color: #9e9e9e; -fx-border-width: 1;");
+                }
+            } catch (Exception e) {
+                // let thread die
+            }
+        });
+    }
+
+    // find the left-side VBox for a given order by matching the "Order #<id>" label text
+    // theres probably a better way to do this but it works
+    private VBox findOrderBoxForOrder(Order order) {
+        if (ordersContainer == null || order == null) return null;
+        for (javafx.scene.Node node : ordersContainer.getChildren()) {
+            if (!(node instanceof VBox vb)) continue;
+            if (vb.getChildren().isEmpty()) continue;
+            javafx.scene.Node first = vb.getChildren().getFirst();
+            if (!(first instanceof HBox topRow)) continue;
+            if (topRow.getChildren().isEmpty()) continue;
+            javafx.scene.Node labelNode = topRow.getChildren().getFirst();
+            if (!(labelNode instanceof Label titleLabel)) continue;
+            String txt = titleLabel.getText();
+            if (txt == null) continue;
+            try {
+                int idxHash = txt.indexOf('#');
+                int idxColon = txt.indexOf(':');
+                if (idxHash >= 0) {
+                    String numStr;
+                    if (idxColon > idxHash) numStr = txt.substring(idxHash + 1, idxColon).trim();
+                    else numStr = txt.substring(idxHash + 1).trim();
+                    int id = Integer.parseInt(numStr);
+                    if (id == order.getOrderID()) {
+                        return vb;
+                    }
+                }
+            } catch (Exception e) {
+                // ignore parse errors,continue
+            }
+        }
+        return null;
+    }
+
+    // for filtering orders list - no buttons yet, defaults to all
     private void applyFilters() {
         if (ordersContainer == null || orderDriver == null){
             return;
@@ -340,8 +574,19 @@ public class OrderTrackerController {
             selectedType = "All";
         }
 
-        ordersContainer.getChildren().clear();
+        // reuse existing boxes when possible to avoid replacing nodes
+        Map<Integer, VBox> existing = new HashMap<>();
+        for (javafx.scene.Node node : ordersContainer.getChildren()) {
+            if (!(node instanceof VBox vb)) continue;
+            Object ud = vb.getUserData();
+            if (ud instanceof Integer) {
+                existing.put((Integer) ud, vb);
+            }
+        }
 
+        List<javafx.scene.Node> newChildren = new ArrayList<>();
+        Set<Integer> kept = new HashSet<>();
+        // just All for now
         for (Order order : orderDriver.getOrders()) {
             boolean statusMatch = selectedStatus.equals("All") ||
                     order.getStatus().name().equalsIgnoreCase(selectedStatus);
@@ -349,9 +594,37 @@ public class OrderTrackerController {
                     formatType(order.getType().name()).equalsIgnoreCase(selectedType);
 
             if (statusMatch && typeMatch) {
-                VBox box = createFileDisplay("Order #" + order.getOrderID(), order);
-                ordersContainer.getChildren().add(box);
+                VBox box = existing.get(order.getOrderID());
+                if (box == null) {
+                    box = createOrderBox("Order #" + order.getOrderID(), order);
+                } else {
+                    // update userData just in case and refresh labels
+                    box.setUserData(order.getOrderID());
+                    refreshOrderBox(box, order);
+                    VBox finalBox = box;
+                    box.setOnMouseClicked(evt -> {
+                        selectOrderBox(finalBox);
+                        selectedOrder = order;
+                        showOrderDetails(order);
+                        if (cancelButton != null) {
+                            cancelButton.setDisable(order.getStatus() == Status.completed || order.getStatus() == Status.cancelled);
+                        }
+                        updateButtonsVisibility(order);
+                    });
+                }
+                newChildren.add(box);
+                kept.add(order.getOrderID());
             }
+        }
+
+        ordersContainer.getChildren().setAll(newChildren);
+
+        // re-select the previously selected order if it is still displayed
+        if (selectedOrder != null) {
+            VBox found = findOrderBoxForOrder(selectedOrder);
+            if (found != null) selectOrderBox(found);
+            else selectedOrderBox = null;
+            updateButtonsVisibility(selectedOrder);
         }
     }
 }
