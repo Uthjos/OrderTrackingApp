@@ -108,13 +108,6 @@ public class OrderTrackerController {
             typeFilter.setValue("All");
             typeFilter.setOnAction(e -> applyFilters());
         }
-        // FIXME
-//        if (filterContainer != null) {
-//            filterContainer.getChildren().clear();
-//            HBox filtersBox = new HBox(10);
-//            filtersBox.getChildren().addAll(statusFilter, typeFilter);
-//            filterContainer.getChildren().add(filtersBox);
-//        }
     }
 
     public void setOrderListener(OrderListener orderListener) {
