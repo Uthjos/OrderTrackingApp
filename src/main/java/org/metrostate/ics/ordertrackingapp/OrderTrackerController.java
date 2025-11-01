@@ -301,6 +301,14 @@ public class OrderTrackerController {
                     if (undoButton != null) undoButton.setDisable(false);
                 }
             }
+            else {
+                // Confirmation message, cancel aborted
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Cancellation Aborted");
+                info.setHeaderText(null);
+                info.setContentText("The order was not cancelled.");
+                info.showAndWait();
+            }
         });
     }
     private void undoCancel() {
