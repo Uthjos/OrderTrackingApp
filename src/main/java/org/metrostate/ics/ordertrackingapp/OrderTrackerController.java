@@ -27,6 +27,12 @@ public class OrderTrackerController {
     @FXML
     private Button undoButton;
 
+    @FXML
+    private ComboBox<String> statusFilter;
+
+    @FXML
+    private ComboBox<String> typeFilter;
+
     private List<String> orderFiles;
     private OrderListener orderListener;
     private OrderDriver orderDriver;
@@ -57,6 +63,26 @@ public class OrderTrackerController {
         }
         if (undoButton != null) {
             undoButton.setOnAction(e -> undoCancel());
+        }
+
+        if (statusFilter != null) {
+            statusFilter.getItems().add("All");
+            for (Status s : Status.values()) {
+                String display = s.name().substring(0, 1).toUpperCase() + s.name().substring(1);
+                statusFilter.getItems().add(display);
+            }
+            statusFilter.setValue("All");
+            statusFilter.setOnAction(e -> applyFilters());
+        }
+
+        if (typeFilter != null) {
+            typeFilter.getItems().add("All");
+            for (Type t : Type.values()) {
+                String display = formatType(t.name());
+                typeFilter.getItems().add(display);
+            }
+            typeFilter.setValue("All");
+            typeFilter.setOnAction(e -> applyFilters());
         }
     }
 
@@ -123,6 +149,7 @@ public class OrderTrackerController {
                 VBox fileBox = createFileDisplay(fileName, fOrder);
                 // insert at top of the orders list
                 ordersContainer.getChildren().addFirst(fileBox);
+                applyFilters();
             });
         }).start();
     }
@@ -262,7 +289,7 @@ public class OrderTrackerController {
         // Confirmation message
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Cancel Order");
-        alert.setHeaderText("Cancel order?");
+        alert.setHeaderText("Would you like to cancel this order?");
         alert.setContentText("Order #" + selectedOrder.getOrderID());
 
         alert.showAndWait().ifPresent(response -> {
@@ -274,6 +301,14 @@ public class OrderTrackerController {
                     if (undoButton != null) undoButton.setDisable(false);
                 }
             }
+            else {
+                // Confirmation message, cancel aborted
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Cancellation Aborted");
+                info.setHeaderText(null);
+                info.setContentText("The order was not cancelled.");
+                info.showAndWait();
+            }
         });
     }
     private void undoCancel() {
@@ -283,6 +318,40 @@ public class OrderTrackerController {
             VBox box = createFileDisplay("Order #" + selectedOrder.getOrderID(), selectedOrder);
             ordersContainer.getChildren().add(0, box);
             if (undoButton != null) undoButton.setDisable(true);
+        }
+    }
+
+    private void applyFilters() {
+        if (ordersContainer == null || orderDriver == null){
+            return;
+        }
+
+        String selectedStatus;
+        if (statusFilter != null) {
+            selectedStatus = statusFilter.getValue();
+        } else {
+            selectedStatus = "All";
+        }
+
+        String selectedType;
+        if (typeFilter != null) {
+            selectedType = typeFilter.getValue();
+        } else {
+            selectedType = "All";
+        }
+
+        ordersContainer.getChildren().clear();
+
+        for (Order order : orderDriver.getOrders()) {
+            boolean statusMatch = selectedStatus.equals("All") ||
+                    order.getStatus().name().equalsIgnoreCase(selectedStatus);
+            boolean typeMatch = selectedType.equals("All") ||
+                    formatType(order.getType().name()).equalsIgnoreCase(selectedType);
+
+            if (statusMatch && typeMatch) {
+                VBox box = createFileDisplay("Order #" + order.getOrderID(), order);
+                ordersContainer.getChildren().add(box);
+            }
         }
     }
 }
