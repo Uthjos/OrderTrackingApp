@@ -108,15 +108,13 @@ public class OrderTrackerController {
             typeFilter.setValue("All");
             typeFilter.setOnAction(e -> applyFilters());
         }
-        if (filterContainer != null) {
-            filterContainer.getChildren().clear();
-            HBox filtersBox = new HBox(10);
-            //filtersBox.getChildren().addAll(statusFilter, typeFilter);
-            //filterContainer.getChildren().add(filtersBox);
-            //filterContainer.getChildren().addAll(filtersBox, ordersContainer);
-            filtersBox.getChildren().addAll(statusFilter, typeFilter);
-            filterContainer.getChildren().add(filtersBox);
-        }
+        // FIXME
+//        if (filterContainer != null) {
+//            filterContainer.getChildren().clear();
+//            HBox filtersBox = new HBox(10);
+//            filtersBox.getChildren().addAll(statusFilter, typeFilter);
+//            filterContainer.getChildren().add(filtersBox);
+//        }
     }
 
     public void setOrderListener(OrderListener orderListener) {
