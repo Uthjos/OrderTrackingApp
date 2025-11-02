@@ -250,7 +250,7 @@ public class Order {
     public String displayType() {
         switch (this.type) {
             case togo:
-                return "Togo";
+                return "To-go";
             case pickup:
                 return "Pickup";
             case delivery:
