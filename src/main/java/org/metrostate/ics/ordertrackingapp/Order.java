@@ -192,9 +192,7 @@ public class Order {
 
         return "Order #" + orderId + "\n" +
                 formattedDate + "\n\n" +
-                //"Status: " + status + '\n' +
                 "Status: " + displayStatus() + '\n' +
-                //"Type: " + type + '\n' +
                 "Type: " + displayType() + '\n' +
                 "Items: " + s +
                 String.format("\n\nTotal Price: $%.2f", totalPrice);
