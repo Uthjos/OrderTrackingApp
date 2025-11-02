@@ -384,7 +384,7 @@ public class OrderTrackerController {
         // Confirmation message
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Cancel Order");
-        alert.setHeaderText("Would you like to cancel this order?");
+        alert.setHeaderText("Are you sure you want to cancel this order? Click OK to confirm.");
         alert.setContentText("Order #" + selectedOrder.getOrderID());
 
         alert.showAndWait().ifPresent(response -> {
