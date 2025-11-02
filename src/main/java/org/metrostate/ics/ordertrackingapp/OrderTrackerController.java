@@ -251,9 +251,7 @@ public class OrderTrackerController {
             typeLabel.setText(formattedType);
             typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
 
-            // determine company from sourceName extension
-            String company = sourceName.toLowerCase().endsWith(".json") ? "FoodHub" : "GrubStop";
-            companyLabel.setText(company);
+            companyLabel.setText(order.getCompany());
             // store order id
             orderBox.setUserData(order.getOrderID());
         } else {

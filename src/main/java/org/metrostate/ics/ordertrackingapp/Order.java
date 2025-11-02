@@ -15,6 +15,7 @@ public class Order {
     private Type type;
     private Status status;
     private ArrayList<FoodItem> foodList;
+    private String company;
 
     /**
      * Creates an empty order with the status set to "INCOMING" and an empty food list (empty constructor).
@@ -22,6 +23,7 @@ public class Order {
     public Order() {
         this.foodList = new ArrayList<>();
         this.status = waiting;
+        this.company = null;
     }
 
     /**
@@ -43,6 +45,7 @@ public class Order {
         }
         this.status = waiting;
         this.totalPrice = sumPrice();
+        this.company = null;
     }
 
     /**
@@ -63,6 +66,7 @@ public class Order {
         this.type = type;
         this.status = status;
         this.foodList = new ArrayList<>(foodList);
+        this.company = null;
     }
 
     /**
@@ -191,6 +195,14 @@ public class Order {
                 "Items: " +
                 s +
                 String.format("\n\nTotal Price: $%.2f", totalPrice);
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     public static Status parseOrderStatus(String stringStatus){

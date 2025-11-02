@@ -64,7 +64,9 @@ public class Parser {
             foodItemList.add(new FoodItem(name, quantity, price));
 
         }
-        return new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
+        Order order = new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
+        order.setCompany("FoodHub (JSON)");
+        return order;
     }
 
     /**
@@ -123,7 +125,9 @@ public class Parser {
         }
 
 
-        return new Order (getNextOrderNumber(), orderType, orderDate, foodItemList);
+        Order order = new Order (getNextOrderNumber(), orderType, orderDate, foodItemList);
+        order.setCompany("GrubStop (XML)");
+        return order;
     }
 
     public static Order parseExportedFile(File file) throws IOException {
