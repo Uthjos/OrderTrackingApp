@@ -428,7 +428,14 @@ public class OrderTrackerController {
                 VBox found = findOrderBoxForOrder(selectedOrder);
                 if (found != null) refreshOrderBox(found, selectedOrder);
                 showOrderDetails(selectedOrder);
+
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Order Restored");
+                info.setHeaderText(null);
+                info.setContentText("Order #" + selectedOrder.getOrderID() + " has been restored.");
+                info.showAndWait();
             }
+
             updateButtonsVisibility(selectedOrder);
         });
     }
