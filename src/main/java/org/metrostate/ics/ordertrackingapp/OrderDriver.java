@@ -18,31 +18,62 @@ public class OrderDriver {
     private List<Order> orders;
     private Order lastCancelledOrder = null;
 
-    // listener to watch for changes to an order's status -- in order to update GUI when buttons are clicked
+    /**
+     * Listener to watch for changes to an order's status -- in order to update the GUI when buttons are clicked.
+     */
     public interface OrderChangeListener {
+        /**
+         * Called when a new order is added.
+         *
+         * @param order The newly added order
+         */
         void orderAdded(Order order);
+
+        /**
+         * Called when an existing order is updated.
+         *
+         * @param order The updated order
+         */
         void orderChanged(Order order);
     }
 
     private final List<OrderChangeListener> listeners = new ArrayList<>();
 
+    /**
+     * Adds a listener.
+     *
+     * @param l The listener to add
+     */
     public void addListener(OrderChangeListener l) {
         if (l == null) return;
         listeners.add(l);
     }
 
+    /**
+     * Removes a listener.
+     *
+     * @param l The listener to remove
+     */
     public void removeListener(OrderChangeListener l) {
         listeners.remove(l);
     }
 
-    //for adding new order to GUI
+    /**
+     * Notifies all listeners that a new order has been added to update the GUI.
+     *
+     * @param o The order that was added
+     */
     private void notifyOrderAdded(Order o) {
         for (OrderChangeListener l : new ArrayList<>(listeners)) {
             try { l.orderAdded(o); } catch (Exception ignored) {}
         }
     }
 
-    //for updating order status in GUI
+    /**
+     * Notifies all listeners that an order has changed, updating the GUI.
+     *
+     * @param o The order that changed
+     */
     private void notifyOrderChanged(Order o) {
         for (OrderChangeListener l : new ArrayList<>(listeners)) {
             try { l.orderChanged(o); } catch (Exception ignored) {}
@@ -102,6 +133,12 @@ public class OrderDriver {
         }
     }
 
+    /**
+     * Saves the given order as a JSON file in the specified directory.
+     *
+     * @param order             The order to save
+     * @param fileDirectory     The folder where the JSON file will be created
+     */
     public static void orderExportJSON(Order order, String fileDirectory) {
         JSONObject OrderJSON = new JSONObject();
 
@@ -184,6 +221,12 @@ public class OrderDriver {
         return incompleteOrders;
     }
 
+    /**
+     * Cancels an order.
+     *
+     * @param order     The order to cancel
+     * @return          True if the order was successfully cancelled, false otherwise
+     */
     public boolean cancelOrderGUI(Order order) {
         if (order == null || order.getStatus() == Status.completed){
             return false;
