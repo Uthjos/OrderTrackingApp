@@ -39,7 +39,7 @@ public class OrderTrackerController {
     private ComboBox<String> typeFilter;
 
     @FXML
-    private VBox filterContainer;
+    private HBox filterContainer;
 
     private List<String> orderFiles;
     private OrderListener orderListener;
@@ -576,6 +576,9 @@ public class OrderTrackerController {
         } else {
             selectedType = "All";
         }
+
+        // Clears existing children first to prevent duplicate child errors
+        ordersContainer.getChildren().clear();
 
         // reuse existing boxes when possible to avoid replacing nodes
         Map<Integer, VBox> existing = new HashMap<>();

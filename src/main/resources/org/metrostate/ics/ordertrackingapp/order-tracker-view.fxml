@@ -30,6 +30,13 @@
             </font>
         </Button>
     </HBox>
+    <HBox fx:id="filterContainer" spacing="10.0" alignment="CENTER_LEFT">
+        <Label text="Status:"/>
+        <ComboBox fx:id="statusFilter" prefWidth="120.0"/>
+
+        <Label text="Type:"/>
+        <ComboBox fx:id="typeFilter" prefWidth="120.0"/>
+    </HBox>
     <Label prefWidth="171.0" text="Sort options here eventually">
       <font>
          <Font name="System Bold Italic" size="13.0" />
