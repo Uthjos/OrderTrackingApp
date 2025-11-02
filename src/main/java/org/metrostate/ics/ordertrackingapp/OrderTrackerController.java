@@ -253,13 +253,6 @@ public class OrderTrackerController {
             String type = formatType(order.displayType());
             typeLabel.setText(type);
             typeLabel.setStyle("-fx-text-fill: " + typeColor(type) + "; -fx-font-weight: bold;");
-            //String type = String.valueOf(order.displayType());
-            //String formattedType = formatType(type);
-            //String type = formatType(order.displayType());
-           // String formattedType = order.displayType();
-
-            //typeLabel.setText(formattedType);
-            //typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
 
             companyLabel.setText(order.getCompany());
             // store order id
@@ -604,12 +597,6 @@ public class OrderTrackerController {
         for (Order order : orderDriver.getOrders()) {
             boolean statusMatch = selectedStatus.equals("All") ||
                     order.displayStatus().equalsIgnoreCase(selectedStatus);
-                    //order.getStatus().toString().equalsIgnoreCase(selectedStatus);
-                    //order.getStatus().name().equalsIgnoreCase(selectedStatus);
-            //boolean typeMatch = selectedType.equals("All") ||
-                    //order.displayType().equalsIgnoreCase(selectedType);
-                    //formatType(order.getType().name()).equalsIgnoreCase(selectedType);
-            // formatType(order.displayType()).equalsIgnoreCase(selectedType);
             String formattedType = formatType(order.displayType());
             boolean typeMatch = selectedType.equals("All") || formattedType.equalsIgnoreCase(selectedType);
 
