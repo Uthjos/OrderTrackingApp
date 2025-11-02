@@ -187,9 +187,11 @@ public class Order {
         for(FoodItem foodItem: foodList){
             s.append(foodItem.toString());
         }
-        return  "-----------\n"+
-                "Order ID: " + orderId + "\n" +
-                "Date: " + date + "\n" +
+        java.time.ZonedDateTime zdt = java.time.Instant.ofEpochMilli(this.date).atZone(java.time.ZoneId.of("America/Chicago"));
+        String formattedDate = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z").format(zdt);
+
+        return "Order #" + orderId + "\n" +
+                formattedDate + "\n\n" +
                 "Status: " + status + '\n' +
                 "Type: " + type + '\n' +
                 "Items: " +
