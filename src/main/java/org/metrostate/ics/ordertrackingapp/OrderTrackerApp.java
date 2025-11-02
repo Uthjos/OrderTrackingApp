@@ -18,7 +18,14 @@ public class OrderTrackerApp extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(OrderTrackerApp.class.getResource("order-tracker-view.fxml"));
+        // try to find the FXML file, if we run with coverage it looks through a different path
+        // so it has to be found more explicitly
+        java.net.URL fxmlUrl = OrderTrackerApp.class.getResource("order-tracker-view.fxml"); //regularly
+        if (fxmlUrl == null) { //with coverage
+            fxmlUrl = Thread.currentThread().getContextClassLoader()
+                    .getResource("org/metrostate/ics/ordertrackingapp/order-tracker-view.fxml");
+        }
+        FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
         Scene scene = new Scene(fxmlLoader.load(), 800, 600);
 
         OrderTrackerController controller = fxmlLoader.getController();
