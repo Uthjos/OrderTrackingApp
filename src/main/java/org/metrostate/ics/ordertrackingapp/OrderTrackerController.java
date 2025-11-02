@@ -92,8 +92,9 @@ public class OrderTrackerController {
         if (statusFilter != null) {
             statusFilter.getItems().add("All");
             for (Status s : Status.values()) {
-                String display = s.name().substring(0, 1).toUpperCase() + s.name().substring(1);
-                statusFilter.getItems().add(display);
+                statusFilter.getItems().add(s.toString());
+                //String display = s.name().substring(0, 1).toUpperCase() + s.name().substring(1);
+                //statusFilter.getItems().add(display);
             }
             statusFilter.setValue("All");
             statusFilter.setOnAction(e -> applyFilters());
@@ -593,7 +594,8 @@ public class OrderTrackerController {
         // just All for now
         for (Order order : orderDriver.getOrders()) {
             boolean statusMatch = selectedStatus.equals("All") ||
-                    order.getStatus().name().equalsIgnoreCase(selectedStatus);
+                    order.getStatus().toString().equalsIgnoreCase(selectedStatus);
+                    //order.getStatus().name().equalsIgnoreCase(selectedStatus);
             boolean typeMatch = selectedType.equals("All") ||
                     formatType(order.getType().name()).equalsIgnoreCase(selectedType);
 
