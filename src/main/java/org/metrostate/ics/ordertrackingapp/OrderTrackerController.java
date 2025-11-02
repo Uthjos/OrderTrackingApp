@@ -398,6 +398,12 @@ public class OrderTrackerController {
                         VBox found = findOrderBoxForOrder(selectedOrder);
                         if (found != null) refreshOrderBox(found, selectedOrder);
                         updateButtonsVisibility(selectedOrder);
+
+                        Alert info = new Alert(Alert.AlertType.INFORMATION);
+                        info.setTitle("Order Cancelled");
+                        info.setHeaderText(null);
+                        info.setContentText("Order #" + selectedOrder.getOrderID() + " has been cancelled.");
+                        info.showAndWait();
                     });
                 }
             }
@@ -406,7 +412,7 @@ public class OrderTrackerController {
                 Alert info = new Alert(Alert.AlertType.INFORMATION);
                 info.setTitle("Cancellation Aborted");
                 info.setHeaderText(null);
-                info.setContentText("The order was not cancelled.");
+                info.setContentText("Order #" + selectedOrder.getOrderID() + " remains active.");
                 info.showAndWait();
             }
         });
