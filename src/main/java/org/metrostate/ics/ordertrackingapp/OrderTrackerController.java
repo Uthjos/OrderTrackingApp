@@ -92,9 +92,12 @@ public class OrderTrackerController {
         if (statusFilter != null) {
             statusFilter.getItems().add("All");
             for (Status s : Status.values()) {
-                statusFilter.getItems().add(s.toString());
+                //statusFilter.getItems().add(s.toString());
                 //String display = s.name().substring(0, 1).toUpperCase() + s.name().substring(1);
                 //statusFilter.getItems().add(display);
+                Order temp = new Order();
+                temp.setStatus(s);
+                statusFilter.getItems().add(temp.displayStatus());
             }
             statusFilter.setValue("All");
             statusFilter.setOnAction(e -> applyFilters());
@@ -247,10 +250,16 @@ public class OrderTrackerController {
             statusLabel.setStyle("-fx-text-fill: " + statusColor(order.getStatus()) + ";");
 
             // type formatting
-            String type = String.valueOf(order.displayType());
-            String formattedType = formatType(type);
-            typeLabel.setText(formattedType);
-            typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
+            String type = formatType(order.displayType());
+            typeLabel.setText(type);
+            typeLabel.setStyle("-fx-text-fill: " + typeColor(type) + "; -fx-font-weight: bold;");
+            //String type = String.valueOf(order.displayType());
+            //String formattedType = formatType(type);
+            //String type = formatType(order.displayType());
+           // String formattedType = order.displayType();
+
+            //typeLabel.setText(formattedType);
+            //typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
 
             companyLabel.setText(order.getCompany());
             // store order id
@@ -594,10 +603,15 @@ public class OrderTrackerController {
         // just All for now
         for (Order order : orderDriver.getOrders()) {
             boolean statusMatch = selectedStatus.equals("All") ||
-                    order.getStatus().toString().equalsIgnoreCase(selectedStatus);
+                    order.displayStatus().equalsIgnoreCase(selectedStatus);
+                    //order.getStatus().toString().equalsIgnoreCase(selectedStatus);
                     //order.getStatus().name().equalsIgnoreCase(selectedStatus);
-            boolean typeMatch = selectedType.equals("All") ||
-                    formatType(order.getType().name()).equalsIgnoreCase(selectedType);
+            //boolean typeMatch = selectedType.equals("All") ||
+                    //order.displayType().equalsIgnoreCase(selectedType);
+                    //formatType(order.getType().name()).equalsIgnoreCase(selectedType);
+            // formatType(order.displayType()).equalsIgnoreCase(selectedType);
+            String formattedType = formatType(order.displayType());
+            boolean typeMatch = selectedType.equals("All") || formattedType.equalsIgnoreCase(selectedType);
 
             if (statusMatch && typeMatch) {
                 VBox box = existing.get(order.getOrderID());
