@@ -39,6 +39,7 @@ dependencies {
     implementation("org.json:json:20200518")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
 }
 
 tasks.withType<Test> {
