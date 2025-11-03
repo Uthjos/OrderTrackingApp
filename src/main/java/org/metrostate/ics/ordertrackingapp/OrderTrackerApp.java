@@ -34,7 +34,7 @@ public class OrderTrackerApp extends Application {
         controller.setOrderDriver(driver);
 
         // watch the testOrders directory
-        String testOrdersPath = DirectoryHolder.getDirectory(Directory.testOrders);
+        String testOrdersPath = Directory.getDirectory(Directory.testOrders);
         orderListener = new OrderListener(testOrdersPath, controller::addOrderFile);
 
         controller.setOrderListener(orderListener);
