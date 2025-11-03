@@ -34,7 +34,7 @@ public class OrderTrackerApp extends Application {
         controller.setOrderDriver(driver);
 
         // watch the testOrders directory
-        String testOrdersPath = getTestOrdersPath();
+        String testOrdersPath = DirectoryHolder.getDirectory(Directory.testOrders);
         orderListener = new OrderListener(testOrdersPath, controller::addOrderFile);
 
         controller.setOrderListener(orderListener);
@@ -53,17 +53,5 @@ public class OrderTrackerApp extends Application {
         });
     }
 
-    /**
-     * Gets the path to the testOrders directory
-     */
-    private String getTestOrdersPath() {
-        String projectPath = System.getProperty("user.dir");
-        String testOrdersPath = Paths.get(projectPath, "src", "main", "orderFiles", "importOrders").toString();
 
-        File testOrdersDir = new File(testOrdersPath);
-        if (!testOrdersDir.exists()) {
-            testOrdersDir.mkdirs();
-        }
-        return testOrdersPath;
-    }
 }
