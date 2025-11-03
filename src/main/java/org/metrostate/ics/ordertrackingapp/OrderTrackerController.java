@@ -538,7 +538,12 @@ public class OrderTrackerController {
         Platform.runLater(this::applyFilters);
     }
 
-    // update the labels inside a orderBox (left-side list) to reflect current order state
+    /**
+     * Updates the labels inside an orderBox (left-side list) to reflect current order state.
+     *
+     * @param orderBox  The VBox representing the order
+     * @param order     The order whose data will be displayed
+     */
     private void refreshOrderBox(VBox orderBox, Order order) {
         if (order == null) return;
         if (orderBox == null) {
@@ -580,8 +585,12 @@ public class OrderTrackerController {
         });
     }
 
-    // find the left-side VBox for a given order by matching the "Order #<id>" label text
-    // theres probably a better way to do this but it works
+    /**
+     * Finds the left-side VBox for a given order by matching the "Order #<id>" label text.
+     *
+     * @param order The order to locate
+     * @return      The VBox corresponding to the order, or null
+     */
     private VBox findOrderBoxForOrder(Order order) {
         if (ordersContainer == null || order == null) return null;
         for (javafx.scene.Node node : ordersContainer.getChildren()) {
