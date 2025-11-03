@@ -10,6 +10,10 @@ import javafx.application.Platform;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Controller for the GUI.
+ * Manages order display, filtering, and user interactions.
+ */
 public class OrderTrackerController {
     @FXML
     private VBox ordersContainer;
@@ -50,6 +54,10 @@ public class OrderTrackerController {
 
     private final String BASE_BOX_STYLE = "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #DFE8E8; -fx-cursor: hand;";
 
+    /**
+     * Initializes GUI components.
+     * Sets up buttons, filters, and scroll pane defaults.
+     */
     @FXML
     public void initialize() {
         this.orderFiles = new ArrayList<>();
@@ -114,11 +122,21 @@ public class OrderTrackerController {
         }
     }
 
+    /**
+     * Sets the listener to notify the GUI of order changes.
+     *
+     * @param orderListener The listener to notify of order changes
+     */
     public void setOrderListener(OrderListener orderListener) {
 
         this.orderListener = orderListener;
     }
 
+    /**
+     * Sets the OrderDriver.
+     *
+     * @param driver The OrderDriver to set
+     */
     public void setOrderDriver(OrderDriver driver) {
         this.orderDriver = driver;
         // register a listener so the controller updates immediately when the model changes
@@ -285,6 +303,11 @@ public class OrderTrackerController {
         return orderBox;
     }
 
+    /**
+     * Updates the visibility and enabled state of action buttons based on the status of the given order.
+     *
+     * @param order The order whose status determines button states
+     */
     private void updateButtonsVisibility(Order order) {
         if (cancelButton != null) {
             // hide the cancel button when order is completed or cancelled
@@ -316,6 +339,11 @@ public class OrderTrackerController {
         }
     }
 
+    /**
+     * Displays the details of a given order in the detail container.
+     *
+     * @param order The order whose details will be displayed
+     */
     private void showOrderDetails(Order order) {
         if (detailContainer == null) return;
         detailContainer.getChildren().clear();
@@ -332,7 +360,11 @@ public class OrderTrackerController {
         detailContainer.getChildren().addAll(header, details);
     }
 
-    //visual indicator for selected order box
+    /**
+     * Visual indicator for selected order box.
+     *
+     * @param box The VBox representing the order to select
+     */
     private void selectOrderBox(VBox box) {
         if (selectedOrderBox != null) {
             selectedOrderBox.setStyle(BASE_BOX_STYLE);
@@ -378,6 +410,9 @@ public class OrderTrackerController {
         return "#444444";
     }
 
+    /**
+     * Prompts the user to cancel the selected order and updates the GUI.
+     */
     private void cancelSelectedOrder() {
         if (selectedOrder == null || orderDriver == null) return;
 
@@ -418,6 +453,9 @@ public class OrderTrackerController {
         });
     }
 
+    /**
+     * Restores a previously cancelled order and updates the GUI.
+     */
     private void undoCancel() {
         if (orderDriver == null || selectedOrder == null) return;
         boolean success = orderDriver.uncancelOrder(selectedOrder);
@@ -440,7 +478,9 @@ public class OrderTrackerController {
         });
     }
 
-    // start the selected order (waiting -> inProgress)
+    /**
+     * Starts the selected order (waiting -> inProgress).
+     */
     private void startSelectedOrder() {
         if (selectedOrder == null || orderDriver == null) return;
         orderDriver.startOrder(selectedOrder);
@@ -468,7 +508,9 @@ public class OrderTrackerController {
         Platform.runLater(this::applyFilters);
     }
 
-    // complete the selected order (inProgress -> completed)
+    /**
+     * Completes the selected order (inProgress -> completed)
+     */
     private void completeSelectedOrder() {
         if (selectedOrder == null || orderDriver == null) return;
         orderDriver.completeOrder(selectedOrder);
@@ -571,7 +613,9 @@ public class OrderTrackerController {
         return null;
     }
 
-    // for filtering orders list - no buttons yet, defaults to all
+    /**
+     * Filters the orders displayed in the GUI based on the selected status and type.
+     */
     private void applyFilters() {
         if (ordersContainer == null || orderDriver == null){
             return;
