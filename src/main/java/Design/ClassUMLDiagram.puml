@@ -39,27 +39,29 @@ class OrderTrackerController {
     - undoButton : Button
     - startButton : Button
     - completeButton : Button
+    - clearAllOrdersButton : Button
     - statusFilter : ComboBox<String>
     - typeFilter : ComboBox<String>
-    - filterContainer : HBox
     - orderFiles : List<String>
     - orderListener : OrderListener
     - orderDriver : OrderDriver
     - selectedOrderBox : VBox
     - selectedOrder : Order
     - driverListener : OrderDriver.OrderChangeListener
-    - BASE_BOX_STYLE : String
+    - BASE_BOX_STYLE : String {final}
 
     + initialize() : void
     + setOrderListener(orderListener: OrderListener) : void
     + setOrderDriver(driver: OrderDriver) : void
-    - exitApplication() : void
+    + exitApplication() : void
+    + clearAllOrders() : void
+    - updateClearAllButtonVisibility() : void
+    - saveStateOnExit() : void
     + addOrderFile(file: File) : void
     - createOrderBox(sourceName: String, order: Order) : VBox
     - updateButtonsVisibility(order: Order) : void
     - showOrderDetails(order: Order) : void
     - selectOrderBox(box: VBox) : void
-    - formatType(raw: String) : String
     - statusColor(status: Status) : String
     - typeColor(formattedType: String) : String
     - cancelSelectedOrder() : void
