@@ -3,12 +3,14 @@ package org.metrostate.ics.ordertrackingapp;
 import javafx.application.Platform;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <a href="https://docs.oracle.com/javase/tutorial/essential/io/notification.html">...</a>
@@ -46,6 +48,29 @@ public class OrderListener implements Runnable {
     }
 
     /**
+     * Attempts to open a file to ensure it is fully written and readable.
+     * Tries up to 5 times, sleeping between attempts.
+     * Returns true when the file could be opened and closed successfully.
+     */
+    private boolean waitForFileReadable(File file, long baseSleepMillis) {
+        for (int attempt = 1; attempt <= 5; attempt++) {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                // able to open the file for reading -> consider it ready
+                return true;
+            } catch (IOException e) {
+                if (attempt == 5) break;
+                try {
+                    Thread.sleep(baseSleepMillis * attempt);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Loads existing files in the directory on startup.
      */
     private void loadExistingFiles() {
@@ -56,9 +81,12 @@ public class OrderListener implements Runnable {
 
             if (files != null) {
                 for (File file : files) {
-                    processedFiles.add(file.getName());
-                    // notify callback for existing files to populate GUI
-                    Platform.runLater(() -> callback.onNewOrderFile(file));
+                    // wait for the file to be readable before notifying
+                    if (waitForFileReadable(file, 100)) {
+                        processedFiles.add(file.getName());
+                        // notify callback for existing files to populate GUI
+                        Platform.runLater(() -> callback.onNewOrderFile(file));
+                    }
                 }
             }
         }
@@ -78,6 +106,15 @@ public class OrderListener implements Runnable {
     public void stop() {
         running = false;
         executorService.shutdown();
+        try {
+            // wait for the background thread to stop
+            if (!executorService.awaitTermination(2, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
@@ -117,24 +154,23 @@ public class OrderListener implements Runnable {
                     if (fileName.toLowerCase().endsWith(".json") ||
                         fileName.toLowerCase().endsWith(".xml")) {
 
-                        // check if this is a new file
+                        File newFile = directoryPath.resolve(filename).toFile();
+
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+
+                        // wait until the file is readable (not locked)
+                        boolean ready = waitForFileReadable(newFile, 200);
+                        if (!ready) {
+                            continue;
+                        }
+
                         if (!processedFiles.contains(fileName)) {
                             processedFiles.add(fileName);
-
-                            File newFile = directoryPath.resolve(filename).toFile();
-
-                            // sleep to give time for file to be fully written
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-
-                            // notify callback on JavaFX Application Thread
-                            // update the GUI
-                            Platform.runLater(() -> {
-                                callback.onNewOrderFile(newFile);
-                            });
+                            Platform.runLater(() -> callback.onNewOrderFile(newFile));
                         }
                     }
                 }

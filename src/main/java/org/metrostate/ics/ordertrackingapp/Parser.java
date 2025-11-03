@@ -45,25 +45,29 @@ public class Parser {
         Type orderType;
         List<FoodItem> foodItemList = new ArrayList<>();
 
-        JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
-        JSONObject orderJson = jsonObject.getJSONObject("order");
-        Object orderDateObj = orderJson.get("order_date");
-        if (orderDateObj instanceof Number) orderDate = ((Number) orderDateObj).longValue();
-        else orderDate = Long.parseLong(String.valueOf(orderDateObj));
+        // use try-with-resources to ensure the FileReader is closed and the file isn't left locked
+        try (FileReader fr = new FileReader(file)) {
+            JSONObject jsonObject = new JSONObject(new JSONTokener(fr));
+            JSONObject orderJson = jsonObject.getJSONObject("order");
+            Object orderDateObj = orderJson.get("order_date");
+            if (orderDateObj instanceof Number) orderDate = ((Number) orderDateObj).longValue();
+            else orderDate = Long.parseLong(String.valueOf(orderDateObj));
 
 
-        String typeStr = orderJson.getString("type");
-        orderType = Type.valueOf(typeStr.toLowerCase());
+            String typeStr = orderJson.getString("type");
+            orderType = Type.valueOf(typeStr.toLowerCase());
 
-        JSONArray itemArray = orderJson.getJSONArray("items");
-        for (Object o : itemArray) {
-            JSONObject item = (JSONObject) o;
-            int quantity = ((Number) item.get("quantity")).intValue();
-            double price = ((Number) item.get("price")).doubleValue();
-            String name = item.getString("name");
-            foodItemList.add(new FoodItem(name, quantity, price));
+            JSONArray itemArray = orderJson.getJSONArray("items");
+            for (Object o : itemArray) {
+                JSONObject item = (JSONObject) o;
+                int quantity = ((Number) item.get("quantity")).intValue();
+                double price = ((Number) item.get("price")).doubleValue();
+                String name = item.getString("name");
+                foodItemList.add(new FoodItem(name, quantity, price));
 
+            }
         }
+
         Order order = new Order(getNextOrderNumber(),orderType,orderDate,foodItemList);
         order.setCompany("FoodHub (JSON)");
         return order;

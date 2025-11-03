@@ -9,6 +9,8 @@ import javafx.application.Platform;
 
 import java.io.*;
 import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Controller for the GUI.
@@ -178,12 +180,13 @@ public class OrderTrackerController {
      */
     @FXML
     private void exitApplication() {
-        saveStateOnExit();
-
-        // stop the OrderListener thread
+        // stop the OrderListener thread first to avoid holding file handles while we move/delete files
         if (orderListener != null) {
             orderListener.stop();
         }
+
+        saveStateOnExit();
+
         if (orderDriver != null && driverListener != null) {
             orderDriver.removeListener(driverListener);
         }
@@ -252,6 +255,57 @@ public class OrderTrackerController {
         }
 
         orderDriver.saveAllOrdersToJSON(savedOrdersPath);
+
+        // move all orders from import to test by copying and deleting originals (3 delete retries)
+        String importPath = Directory.getDirectory(Directory.importOrders);
+        String testPath = Directory.getDirectory(Directory.testOrders);
+
+        File importDir = new File(importPath);
+        File testDir = new File(testPath);
+        if (!testDir.exists()) {
+            testDir.mkdirs();
+        }
+
+        if (importDir.exists() && importDir.isDirectory()) {
+            File[] files = importDir.listFiles((dir, name) -> {
+                String lower = name.toLowerCase();
+                return lower.endsWith(".json") || lower.endsWith(".xml");
+            });
+
+            if (files != null) {
+                for (File f : files) {
+                    File dest = new File(testDir, f.getName());
+                    try {
+                        // copy (overwrite if exists)
+                        Files.copy(f.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        System.err.println("Failed to copy " + f.getAbsolutePath() + " to " + dest.getAbsolutePath() + ": " + e.getMessage());
+                        continue;
+                    }
+
+                    // try deleting original up to 4 times with longer delay each time
+                    boolean deleted = false;
+                    for (int attempt = 1; attempt <= 4; attempt++) {
+                        try {
+                            deleted = Files.deleteIfExists(f.toPath());
+                            if (deleted || !f.exists()) break;
+                        } catch (IOException ioe) {
+                            // ignore and retry
+                        }
+                        try {
+                            Thread.sleep(100 * attempt);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
+                    }
+
+                    if (!deleted) {
+                        System.err.println("Failed to delete original file after moving to testOrders directory: " + f.getAbsolutePath());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -727,7 +781,6 @@ public class OrderTrackerController {
         }
 
         List<javafx.scene.Node> newChildren = new ArrayList<>();
-        Set<Integer> kept = new HashSet<>();
         // just All for now
         for (Order order : orderDriver.getOrders()) {
             boolean statusMatch = selectedStatus.equals("All") ||
@@ -754,7 +807,6 @@ public class OrderTrackerController {
                     });
                 }
                 newChildren.add(box);
-                kept.add(order.getOrderID());
             }
         }
 
