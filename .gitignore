@@ -43,5 +43,5 @@ bin/
 .DS_Store
 
 # Ignore order files (JSON and XML) but keep directory placeholders like spaceHolder.txt
-/src/main/orderFiles/**/*.json
-/src/main/orderFiles/**/*.xml
+/src/main/orderFiles/testOrders/*.json
+/src/main/orderFiles/testOrders/*.xml

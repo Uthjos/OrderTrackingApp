@@ -1,43 +1,57 @@
-# ICS 372-01: Object-Oriented Design and Implementation
+# Order Tracking System (ICS 372-01)
 
-## Overview
+A Java/JavaFX desktop application for managing restaurant orders.
 
-This project is a FoodHub Order Management System with a graphical user interface (GUI) for managing restaurant orders. Users (restaurant staff) can import orders from JSON files, start and complete orders, view orders individually or by status, and export all orders to JSON.
+## Project summary
+
+- Language: Java 
+- UI: JavaFX (javafx.controls, javafx.fxml)
+- Primary dependency: `org.json:json` 
 
 ## Features
 
-- **Display Order(s):**
-    - Display relevant information for order(s): e.g. Items, ID, Price.
-        - View a single order by selecting from a dropdown.
-        - View groups of orders by status: Uncompleted (Incoming/In Progress), Completed, or All.
-- **Start Incoming Order:** Mark an "INCOMING" order as "IN PROGRESS".
-- **Complete In-Progress Order:** Mark an "IN PROGRESS" order as "COMPLETED".
-- **Import Order JSON:** Add new orders by selecting a JSON file. It will open the code/src/main/java/Resources directory in a file explorer by default, but you may browse and choose a file from elsewhere.
-- **Export All Orders to JSON:** Save all orders to a JSON file to the Exports directory, creating such directory if it does not exist.
-- **Exit:** Close the application.
+- Display order overview, with further details on click
+- Edit the status of an order (Waiting -> In Progress -> Completed)
+- Cancel or un-cancel orders
+- Import orders from JSON or XML files
+- Save order states on exit and load saved orders on startup
 
-## How to Run
+## Project layout
 
-- Open the project directory.
-- Run Launcher.java to launch the GUI.
-- Import at least one order JSON to use functionality.
+- Source: `src/main/java`
+- FXML/UI: `src/main/resources/org/metrostate/ics/ordertrackingapp/order-tracker-view.fxml`
+- Orders and working files: `src/main/orderFiles/` (contains `testOrders/`, `savedOrders/`, `importOrders/`)
+- Tests: `test/java/org/metrostate/ics/ordertrackingapp/`
+
+Note: The repository purposely keeps placeholder files (`spaceHolder.txt`) in the `orderFiles` directories so Git tracks the directories when actual JSON/XML orders are ignored.
+
+## Run
+
+Run within an IDE that supports Gradle (e.g., IntelliJ IDEA) by running the "Launcher.java" main class.
+
+## Using the application
+
+1. On first startup, the application will not have any orders loaded.
+2. Import one or more orders by placing a validly formatted order file (JSON or XML) into the `src/main/orderFiles/importOrders/` directory, which will automatically populate the order list.
+3. Click on an order in the list to view its details, and edit its status or cancel/un-cancel it using the provided buttons.
+4. Filter orders by status and/or type using the dropdown menus at the top.
+5. Optionally, clear all orders using the "Clear All Orders" button.
+6. On exit:
+    - All current orders will be saved to `src/main/orderFiles/savedOrders/` as JSON files.
+    - On the next startup, these saved orders will be automatically loaded then cleared from the directory.
+    - Any order files in `src/main/orderFiles/importOrders/` will be moved into the `testOrders/` directory for any future use and will not be re-imported on the next startup, unless moved back manually.
+
 
 ## Dependencies
 
-- Java SE 8 or higher
-- [org.json.simple](https://github.com/fangyidong/json-simple) (for JSON parsing and writing)
-- No external GUI libraries required (uses javax.swing)
-
-## Design
-
-#### Class Diagram
-![Project 1 UML](src/main/java/Design/ClassUMLDiagram.png)
-
-#### Sequence Diagram
-![Project 1 Sequence Diagram](src/main/java/Design/SequenceDiagramPhase2.png)
+- JavaFX 21 
+- org.json:json 
+- JUnit Jupiter (for tests)
+- Mockito (tests)
 
 ## Authors
-- Aidan Mahlberg
+
 - Joseph Murtha
 - Rocky Xiong
 - Ashley Zenzola
+- Aidan Mahlberg
