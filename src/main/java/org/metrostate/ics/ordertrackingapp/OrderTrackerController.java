@@ -70,7 +70,7 @@ public class OrderTrackerController {
         if (cancelButton != null){
             cancelButton.setDisable(true);
             cancelButton.setVisible(false);
-            // so it doesnt take up space when hidden
+            // so it doesn't take up space when hidden
             cancelButton.setManaged(false);
         }
         if (undoButton != null){
@@ -117,7 +117,7 @@ public class OrderTrackerController {
             typeFilter.setOnAction(e -> applyFilters());
         }
 
-        // clear all order sbutton hidden at startup
+        // clear all orders button hidden at startup
         if (clearAllOrdersButton != null) {
             clearAllOrdersButton.setVisible(false);
             clearAllOrdersButton.setManaged(false);
@@ -146,7 +146,7 @@ public class OrderTrackerController {
             driverListener = new OrderDriver.OrderChangeListener() {
                 @Override
                 public void orderAdded(Order order) {
-                    // orders on seperate thread - update UI on JavaFX thread
+                    // orders on separate thread - update UI on JavaFX thread
                     Platform.runLater(() -> {
                         applyFilters();
                         updateClearAllButtonVisibility(); //only visible when there are orders
@@ -623,7 +623,7 @@ public class OrderTrackerController {
 
         final VBox boxToUpdate = orderBox;
         final Order orderCopy = order;
-        // do UI updates on the JavaFX Application Thread
+        // do UI update on the JavaFX Application Thread
         Platform.runLater(() -> {
             try {
                 // topRow: [orderTitle, statusLabel]
