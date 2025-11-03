@@ -2,10 +2,12 @@ package org.metrostate.ics.ordertrackingapp;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
 
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -102,22 +104,82 @@ class OrderDriverTest {
 
     @Test
     void saveAllOrdersToJSON() {
+        ArrayList<FoodItem> foodItems = new ArrayList<>();
+        FoodItem foodItem = new FoodItem("apple",1,3.20);
+        foodItems.add(foodItem);
+        Order order = new  Order(1,Type.togo,1233123,foodItems);
+        driver.addOrder(order);
 
+        File fileDirectory = new File("src/test/java/org/metrostate/ics/ordertrackingapp/testFolder");
+        if (!fileDirectory.exists()){
+            fileDirectory.mkdir();
+        }
+
+        //assert
+
+        assertTrue(fileDirectory.exists());
+
+        //arrange
+        driver.saveAllOrdersToJSON(fileDirectory.getPath());
+        File testfile = new File("src/test/java/org/metrostate/ics/ordertrackingapp/testFolder/Saved_Order1.json");
+
+        //assert
+        assertTrue(testfile.exists());
+
+        //after
+        testfile.delete();
+        fileDirectory.delete();
     }
 
     @Test
     void clearAllOrders() {
+        Order order = new  Order(1,Type.togo,1233123,null);
+        driver.addOrder(order);
+        driver.clearAllOrders();
+        assertTrue(driver.getOrders().isEmpty());
     }
 
     @Test
     void getOrders() {
+        //arrange
+        Order order = new  Order(1,Type.togo,1233123,null);
+        List<Order> orders = new ArrayList<>();
+        orders.add(order);
+        driver.addOrder(order);
+        //assert
+        assertEquals(orders,driver.getOrders());
     }
 
     @Test
     void cancelOrderGUI() {
+        Order order = new  Order(1,Type.togo,1233123,null);
+        driver.addOrder(order);
+        driver.cancelOrderGUI(order);
+        assertEquals(Status.cancelled,driver.getOrders().getFirst().getStatus());
+    }
+    @Test
+    void cancelOrderGUICompleted() {
+        Order order = new  Order(1,Type.togo,1233123,null);
+        driver.addOrder(order);
+        driver.getOrders().getFirst().setStatus(Status.completed);
+        driver.cancelOrderGUI(order);
+        assertEquals(Status.completed,driver.getOrders().getFirst().getStatus());
+
     }
 
     @Test
     void uncancelOrder() {
+        //arrange
+        Order order = new  Order(1,Type.togo,1233123,null);
+        driver.addOrder(order);
+        driver.cancelOrderGUI(order);
+
+        //assert
+        assertEquals(Status.cancelled,driver.getOrders().getFirst().getStatus());
+
+        //arrange
+        driver.uncancelOrder(order);
+        //assert
+        assertEquals(Status.waiting,driver.getOrders().getFirst().getStatus());
     }
 }
