@@ -7,21 +7,23 @@ class Launcher {
 
 class OrderTrackerApp {
     - orderListener: OrderListener
+
     + start(stage: Stage) : void
     - getTestOrdersPath() : String
 }
 
 class OrderListener {
-    - directoryPath: Path
-    - callback: OrderFileCallback
-    - executorService: ExecutorService
-    - processedFiles: Set<String>
-    - running: boolean
+    - directoryPath : Path
+    - callback : OrderFileCallback
+    - executorService : ExecutorService
+    - running : boolean
+    - processedFiles : Set<String>
+
     + OrderListener(directoryPath: String, callback: OrderFileCallback)
-    - loadExistingFiles() : void
     + start() : void
     + stop() : void
     + run() : void
+    - loadExistingFiles() : void
 }
 
 interface OrderFileCallback {
@@ -29,67 +31,68 @@ interface OrderFileCallback {
 }
 
 class OrderTrackerController {
-    - ordersContainer: VBox
-    - detailContainer: VBox
-    - scrollPane: ScrollPane
-    - cancelButton: Button
-    - undoButton: Button
-    - startButton: Button
-    - completeButton: Button
-    - statusFilter: ComboBox<String>
-    - typeFilter: ComboBox<String>
-    - filterContainer: HBox
-    - orderFiles: List<String>
-    - orderListener: OrderListener
-    - orderDriver: OrderDriver
-    - selectedOrderBox: VBox
-    - selectedOrder: Order
-    - driverListener: OrderDriver.OrderChangeListener
+    - ordersContainer : VBox
+    - detailContainer : VBox
+    - scrollPane : ScrollPane
+    - cancelButton : Button
+    - undoButton : Button
+    - startButton : Button
+    - completeButton : Button
+    - statusFilter : ComboBox<String>
+    - typeFilter : ComboBox<String>
+    - filterContainer : HBox
+    - orderFiles : List<String>
+    - orderListener : OrderListener
+    - orderDriver : OrderDriver
+    - selectedOrderBox : VBox
+    - selectedOrder : Order
+    - driverListener : OrderDriver.OrderChangeListener
+    - BASE_BOX_STYLE : String
+
     + initialize() : void
     + setOrderListener(orderListener: OrderListener) : void
     + setOrderDriver(driver: OrderDriver) : void
-    + orderAdded(order: Order) : void
-    + orderChanged(order: Order) : void
+    - exitApplication() : void
     + addOrderFile(file: File) : void
-    - createOrderBox(sourceName: String, order: Order): VBox
-    - updateButtonsVisibility(order: Order): void
-    - showOrderDetails(order: Order): void
-    - selectOrderBox(box: VBox): void
-    - formatType(raw: String): String
-    - statusColor(status: Status): String
-    - typeColor(formattedType: String): String
-    - cancelSelectedOrder(): void
-    - undoCancel(): void
-    - startSelectedOrder(): void
-    - completeSelectedOrder(): void
-    - refreshOrderBox(orderBox: VBox, order: Order): void
-    - findOrderBoxForOrder(order: Order): VBox
-    + exitApplication() : void
-    - applyFilters() : void
+    - createOrderBox(sourceName: String, order: Order) : VBox
+    - updateButtonsVisibility(order: Order) : void
+    - showOrderDetails(order: Order) : void
+    - selectOrderBox(box: VBox) : void
+    - formatType(raw: String) : String
+    - statusColor(status: Status) : String
+    - typeColor(formattedType: String) : String
+    - cancelSelectedOrder() : void
+    - undoCancel() : void
+    - startSelectedOrder() : void
+    - completeSelectedOrder() : void
     - refreshOrderBox(orderBox: VBox, order: Order) : void
+    - findOrderBoxForOrder(order: Order) : VBox
+    - applyFilters() : void
 }
 
 class OrderDriver {
-    - orders: List<Order>
-    - lastCancelledOrder: Order
-    - listeners: List<OrderChangeListener>
+    - orders : List<Order>
+    - lastCancelledOrder : Order
+    - listeners : List<OrderChangeListener>
+
+    + OrderDriver()
+    + addListener(l: OrderChangeListener) : void
+    + removeListener(l: OrderChangeListener) : void
+    - notifyOrderAdded(o: Order) : void
+    - notifyOrderChanged(o: Order) : void
     + addOrder(order: Order) : void
     + startOrder(order: Order) : void
     + completeOrder(order: Order) : void
+    + static orderExportJSONAll(orderDriver: OrderDriver, fileDirectory: String) : void
+    + static orderExportJSON(order: Order, fileDirectory: String) : void
+    + getOrders() : List<Order>
+    + getCompleteOrders() : List<Order>
+    + getIncompleteOrders() : List<Order>
     + cancelOrderGUI(order: Order) : boolean
+    + undoCancel() : void
+    + cancelOrder(order: Order) : void
     + uncancelOrder(order: Order) : boolean
-    + addListener(l: OrderChangeListener) : void
-    + removeListener(l: OrderChangeListener) : void
-    + notifyOrderAdded(o: Order): void
-    + notifyOrderChanged(o: Order): void
-    + OrderDriver()
-    + orderExportJSON(order: Order, fileDirectory: String): void
-    + getOrders(): List<Order>
-    + getCompleteOrders(): List<Order>
-    + getIncompleteOrders(): List<Order>
-    + undoCancel(): void
-    + cancelOrder(order: Order): void
-    + getCancelledOrders(): List<Order>
+    + getCancelledOrders() : List<Order>
 }
 
 interface OrderChangeListener {
@@ -98,57 +101,62 @@ interface OrderChangeListener {
 }
 
 class Parser {
-    - nextOrderNumber: int
-    + parseJSONOrder(file: File) : Order
-    + parseXMLOrder(file: File) : Order
-    + parseExportedFile(file: File) : Order
-    + setNextOrderNumber(orderID: int) : void
-    + getNextOrderNumber(): int
-    + main(args: String[]): void
+    - nextOrderNumber : int {static}
+
+    + setNextOrderNumber(orderID: int) : void {static}
+    + parseJSONOrder(file: File) : Order {static}
+    + parseXMLOrder(file: File) : Order {static}
+    + parseExportedFile(file: File) : Order {static}
+    - getNextOrderNumber() : int {static}
+    + main(args: String[]) : void {static}
 }
 
 class Order {
-    - orderId: int
-    - date: long
-    - totalPrice: double
-    - type: Type
-    - status: Status
-    - foodList: ArrayList<FoodItem>
-    - company: String
+    - orderId : int
+    - date : long
+    - totalPrice : double
+    - type : Type
+    - status : Status
+    - foodList : ArrayList<FoodItem>
+    - company : String
+
     + Order()
     + Order(orderId: int, type: Type, date: long, foodList: List<FoodItem>)
     + Order(orderId: int, date: long, totalPrice: double, type: Type, status: Status, foodList: List<FoodItem>)
-    + getDate(): long
-    + getTotalPrice(): double
-    + getType(): Type
-    + getStatus(): Status
-    + getFoodList(): ArrayList<FoodItem>
-    + getOrderID(): int
-    + sumPrice(): double
-    + addFoodItem(f: FoodItem): boolean
-    + setStatus(newStatus: Status): void
-    + getCompany(): String
-    + setCompany(company: String): void
-    + parseOrderStatus(stringStatus: String): Status
-    + parseOrderType(stringType: String): Type
-    + displayStatus(): String
-    + displayType(): String
-    + toString(): String
+
+    + getDate() : long
+    + getTotalPrice() : double
+    + getType() : Type
+    + getStatus() : Status
+    + getFoodList() : ArrayList<FoodItem>
+    + getOrderID() : int
+    + sumPrice() : double
+    + addFoodItem(f: FoodItem) : boolean
+    + setStatus(newStatus: Status) : void
+    + toString() : String
+    + getCompany() : String
+    + setCompany(company: String) : void
+    + parseOrderStatus(stringStatus: String) : Status {static}
+    + parseOrderType(stringType: String) : Type {static}
+    + displayStatus() : String
+    + displayType() : String
 }
 
 class FoodItem {
-    - name: String
-    - quantity: int
-    - price: double
+    - name : String
+    - quantity : int
+    - price : double
+
     + FoodItem()
     + FoodItem(name: String, quantity: int, price: double)
-    + getName(): String
-    + setName(name: String): void
-    + getQuantity(): int
-    + setQuantity(quantity: int): void
-    + getPrice(): double
-    + setPrice(price: double): void
-    + toString(): String
+
+    + getName() : String
+    + setName(name: String) : void
+    + getQuantity() : int
+    + setQuantity(quantity: int) : void
+    + getPrice() : double
+    + setPrice(price: double) : void
+    + toString() : String
 }
 enum Status {
     cancelled
