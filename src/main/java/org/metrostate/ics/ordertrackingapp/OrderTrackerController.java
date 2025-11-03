@@ -248,8 +248,7 @@ public class OrderTrackerController {
     private void saveStateOnExit() {
         if (orderDriver == null) return;
 
-        String projectPath = System.getProperty("user.dir");
-        String savedOrdersPath = java.nio.file.Paths.get(projectPath, "src", "main", "orderFiles", "savedOrders").toString();
+        String savedOrdersPath = Directory.getDirectory(Directory.saveOrders);
 
         File savedOrdersDir = new File(savedOrdersPath);
         if (!savedOrdersDir.exists()) {
