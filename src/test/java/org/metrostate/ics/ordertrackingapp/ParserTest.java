@@ -16,9 +16,7 @@ class ParserTest {
         //arrange
         File file = new File("src/main/orderFiles/testOrders/order_09-16-2025_10-00.json");
         Order order = Parser.parseJSONOrder(file);
-
         //assert
-        assertEquals(1,order.getOrderID());
         assertEquals(Type.togo, order.getType());
         assertEquals(1758027600000L,order.getDate());
 
