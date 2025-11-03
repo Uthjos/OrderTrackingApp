@@ -34,7 +34,7 @@ This project is a FoodHub Order Management System with a graphical user interfac
 ![Project 1 UML](src/main/java/Design/ClassUMLDiagram.png)
 
 #### Sequence Diagram
-![Project 1 Sequence Diagram](src/main/java/Design/SequenceDiagram.png)
+![Project 1 Sequence Diagram](src/main/java/Design/SequenceDiagramPhase2.png)
 
 ## Authors
 - Aidan Mahlberg
