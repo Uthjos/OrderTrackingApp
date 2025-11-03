@@ -41,3 +41,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignore test order files generated for local testing
+/src/main/orderFiles/testOrders/**
