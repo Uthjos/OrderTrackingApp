@@ -58,7 +58,7 @@ public class OrderTrackerApp extends Application {
      */
     private String getTestOrdersPath() {
         String projectPath = System.getProperty("user.dir");
-        String testOrdersPath = Paths.get(projectPath, "src", "main", "testOrders").toString();
+        String testOrdersPath = Paths.get(projectPath, "src", "main", "orderFiles", "importOrders").toString();
 
         File testOrdersDir = new File(testOrdersPath);
         if (!testOrdersDir.exists()) {
