@@ -247,18 +247,10 @@ public class Order {
      * @return The order's status
      */
     public String displayStatus() {
-        switch (this.status) {
-            case completed:
-                return "Completed";
-            case waiting:
-                return "Waiting";
-            case inProgress:
-                return "In Progress";
-            case cancelled:
-                return "Cancelled";
-            default:
-                return "Error: No Status";
+        if(status == null){
+            return "No Status";
         }
+        return status.toString();
     }
 
     /**
@@ -267,15 +259,9 @@ public class Order {
      * @return The order's type
      */
     public String displayType() {
-        switch (this.type) {
-            case togo:
-                return "To-go";
-            case pickup:
-                return "Pickup";
-            case delivery:
-                return "Delivery";
-            default:
-                return "Error: No Type";
+        if(type == null){
+            return "No Type";
         }
+        return type.toString();
     }
 }
