@@ -10,6 +10,10 @@ import javafx.application.Platform;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Controller for the GUI.
+ * Manages order display, filtering, and user interactions.
+ */
 public class OrderTrackerController {
     @FXML
     private VBox ordersContainer;
@@ -33,13 +37,13 @@ public class OrderTrackerController {
     private Button completeButton;
 
     @FXML
+    private Button clearAllOrdersButton;
+
+    @FXML
     private ComboBox<String> statusFilter;
 
     @FXML
     private ComboBox<String> typeFilter;
-
-    @FXML
-    private HBox filterContainer;
 
     private List<String> orderFiles;
     private OrderListener orderListener;
@@ -50,6 +54,10 @@ public class OrderTrackerController {
 
     private final String BASE_BOX_STYLE = "-fx-border-color: #cccccc; -fx-border-width: 1; -fx-background-color: #DFE8E8; -fx-cursor: hand;";
 
+    /**
+     * Initializes GUI components.
+     * Sets up buttons, filters, and scroll pane defaults.
+     */
     @FXML
     public void initialize() {
         this.orderFiles = new ArrayList<>();
@@ -112,13 +120,29 @@ public class OrderTrackerController {
             typeFilter.setValue("All");
             typeFilter.setOnAction(e -> applyFilters());
         }
+
+        // clear all order sbutton hidden at startup
+        if (clearAllOrdersButton != null) {
+            clearAllOrdersButton.setVisible(false);
+            clearAllOrdersButton.setManaged(false);
+        }
     }
 
+    /**
+     * Sets the listener to notify the GUI of order changes.
+     *
+     * @param orderListener The listener to notify of order changes
+     */
     public void setOrderListener(OrderListener orderListener) {
 
         this.orderListener = orderListener;
     }
 
+    /**
+     * Sets the OrderDriver.
+     *
+     * @param driver The OrderDriver to set
+     */
     public void setOrderDriver(OrderDriver driver) {
         this.orderDriver = driver;
         // register a listener so the controller updates immediately when the model changes
@@ -127,7 +151,10 @@ public class OrderTrackerController {
                 @Override
                 public void orderAdded(Order order) {
                     // orders on seperate thread - update UI on JavaFX thread
-                    Platform.runLater(() -> applyFilters());
+                    Platform.runLater(() -> {
+                        applyFilters();
+                        updateClearAllButtonVisibility(); //only visible when there are orders
+                    });
                 }
 
                 @Override
@@ -155,6 +182,7 @@ public class OrderTrackerController {
      */
     @FXML
     private void exitApplication() {
+        saveStateOnExit();
 
         // stop the OrderListener thread
         if (orderListener != null) {
@@ -165,6 +193,69 @@ public class OrderTrackerController {
         }
         Platform.exit();
         System.exit(0);
+    }
+
+    /**
+     * Called by the Clear All button in the FXML
+     * Clears all orders from the system after confirmation
+     */
+    @FXML
+    private void clearAllOrders() {
+        if (orderDriver == null) return;
+
+        // confirmation dialog
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Clear All Orders");
+        alert.setHeaderText("Are you sure you want to clear all orders?");
+        alert.setContentText("This will remove all orders from the system. This action cannot be undone.");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                orderDriver.clearAllOrders();
+
+                if (ordersContainer != null) {
+                    ordersContainer.getChildren().clear();
+                }
+                if (detailContainer != null) {
+                    detailContainer.getChildren().clear();
+                    Label header = new Label("Order Details");
+                    header.setFont(Font.font("System", FontWeight.BOLD, 16));
+                    detailContainer.getChildren().add(header);
+                }
+
+                selectedOrder = null;
+                selectedOrderBox = null;
+
+                updateClearAllButtonVisibility();
+            }
+        });
+    }
+
+    /**
+     * Updates the visibility of the Clear All Orders button based on whether there are any orders.
+     */
+    private void updateClearAllButtonVisibility() {
+        if (clearAllOrdersButton != null && orderDriver != null) {
+            boolean hasOrders = orderDriver.getOrderCount() > 0;
+            clearAllOrdersButton.setVisible(hasOrders);
+            clearAllOrdersButton.setManaged(hasOrders);
+        }
+    }
+
+    /**
+     * Saves all current orders to the savedOrders directory as JSON files.
+     */
+    private void saveStateOnExit() {
+        if (orderDriver == null) return;
+
+        String savedOrdersPath = Directory.getDirectory(Directory.savedOrders);
+
+        File savedOrdersDir = new File(savedOrdersPath);
+        if (!savedOrdersDir.exists()) {
+            savedOrdersDir.mkdirs();
+        }
+
+        orderDriver.saveAllOrdersToJSON(savedOrdersPath);
     }
 
     /**
@@ -285,6 +376,11 @@ public class OrderTrackerController {
         return orderBox;
     }
 
+    /**
+     * Updates the visibility and enabled state of action buttons based on the status of the given order.
+     *
+     * @param order The order whose status determines button states
+     */
     private void updateButtonsVisibility(Order order) {
         if (cancelButton != null) {
             // hide the cancel button when order is completed or cancelled
@@ -316,6 +412,11 @@ public class OrderTrackerController {
         }
     }
 
+    /**
+     * Displays the details of a given order in the detail container.
+     *
+     * @param order The order whose details will be displayed
+     */
     private void showOrderDetails(Order order) {
         if (detailContainer == null) return;
         detailContainer.getChildren().clear();
@@ -332,7 +433,11 @@ public class OrderTrackerController {
         detailContainer.getChildren().addAll(header, details);
     }
 
-    //visual indicator for selected order box
+    /**
+     * Visual indicator for selected order box.
+     *
+     * @param box The VBox representing the order to select
+     */
     private void selectOrderBox(VBox box) {
         if (selectedOrderBox != null) {
             selectedOrderBox.setStyle(BASE_BOX_STYLE);
@@ -348,7 +453,12 @@ public class OrderTrackerController {
         }
     }
 
-    //helper to format order types
+    /**
+     * Formats a raw order type string for display.
+     *
+     * @param raw   The raw type string
+     * @return      A formatted type string
+     */
     private String formatType(String raw) {
         if (raw == null) return "";
         String t = raw.trim().toLowerCase();
@@ -360,7 +470,12 @@ public class OrderTrackerController {
         return t.substring(0,1).toUpperCase() + t.substring(1);
     }
 
-    // text color helpers
+    /**
+     * Returns a color code based on the order status.
+     *
+     * @param status    The status of the order
+     * @return          A hex color string corresponding to the status
+     */
     private String statusColor(Status status) {
         if (status == null) return "#666666";
         if (status == Status.completed) { return "#2e7d32"; } // green
@@ -369,6 +484,13 @@ public class OrderTrackerController {
         if (status == Status.cancelled) { return "#c62828"; } // red
         return "#666666";
     }
+
+    /**
+     * Returns a color code based on the order type.
+     *
+     * @param formattedType The formatted order type
+     * @return              A hex color string corresponding to the type
+     */
     private String typeColor(String formattedType) {
         if (formattedType == null) return "#444444";
         String t = formattedType.toLowerCase();
@@ -378,6 +500,9 @@ public class OrderTrackerController {
         return "#444444";
     }
 
+    /**
+     * Prompts the user to cancel the selected order and updates the GUI.
+     */
     private void cancelSelectedOrder() {
         if (selectedOrder == null || orderDriver == null) return;
 
@@ -398,6 +523,12 @@ public class OrderTrackerController {
                         VBox found = findOrderBoxForOrder(selectedOrder);
                         if (found != null) refreshOrderBox(found, selectedOrder);
                         updateButtonsVisibility(selectedOrder);
+
+                        Alert info = new Alert(Alert.AlertType.INFORMATION);
+                        info.setTitle("Order Cancelled");
+                        info.setHeaderText(null);
+                        info.setContentText("Order #" + selectedOrder.getOrderID() + " has been cancelled.");
+                        info.showAndWait();
                     });
                 }
             }
@@ -406,12 +537,15 @@ public class OrderTrackerController {
                 Alert info = new Alert(Alert.AlertType.INFORMATION);
                 info.setTitle("Cancellation Aborted");
                 info.setHeaderText(null);
-                info.setContentText("The order was not cancelled.");
+                info.setContentText("Order #" + selectedOrder.getOrderID() + " remains active.");
                 info.showAndWait();
             }
         });
     }
 
+    /**
+     * Restores a previously cancelled order and updates the GUI.
+     */
     private void undoCancel() {
         if (orderDriver == null || selectedOrder == null) return;
         boolean success = orderDriver.uncancelOrder(selectedOrder);
@@ -422,12 +556,21 @@ public class OrderTrackerController {
                 VBox found = findOrderBoxForOrder(selectedOrder);
                 if (found != null) refreshOrderBox(found, selectedOrder);
                 showOrderDetails(selectedOrder);
+
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Order Restored");
+                info.setHeaderText(null);
+                info.setContentText("Order #" + selectedOrder.getOrderID() + " has been restored.");
+                info.showAndWait();
             }
+
             updateButtonsVisibility(selectedOrder);
         });
     }
 
-    // start the selected order (waiting -> inProgress)
+    /**
+     * Starts the selected order (waiting -> inProgress).
+     */
     private void startSelectedOrder() {
         if (selectedOrder == null || orderDriver == null) return;
         orderDriver.startOrder(selectedOrder);
@@ -455,7 +598,9 @@ public class OrderTrackerController {
         Platform.runLater(this::applyFilters);
     }
 
-    // complete the selected order (inProgress -> completed)
+    /**
+     * Completes the selected order (inProgress -> completed)
+     */
     private void completeSelectedOrder() {
         if (selectedOrder == null || orderDriver == null) return;
         orderDriver.completeOrder(selectedOrder);
@@ -483,7 +628,12 @@ public class OrderTrackerController {
         Platform.runLater(this::applyFilters);
     }
 
-    // update the labels inside a orderBox (left-side list) to reflect current order state
+    /**
+     * Updates the labels inside an orderBox (left-side list) to reflect current order state.
+     *
+     * @param orderBox  The VBox representing the order
+     * @param order     The order whose data will be displayed
+     */
     private void refreshOrderBox(VBox orderBox, Order order) {
         if (order == null) return;
         if (orderBox == null) {
@@ -525,8 +675,12 @@ public class OrderTrackerController {
         });
     }
 
-    // find the left-side VBox for a given order by matching the "Order #<id>" label text
-    // theres probably a better way to do this but it works
+    /**
+     * Finds the left-side VBox for a given order by matching the "Order #<id>" label text.
+     *
+     * @param order The order to locate
+     * @return      The VBox corresponding to the order, or null
+     */
     private VBox findOrderBoxForOrder(Order order) {
         if (ordersContainer == null || order == null) return null;
         for (javafx.scene.Node node : ordersContainer.getChildren()) {
@@ -558,7 +712,9 @@ public class OrderTrackerController {
         return null;
     }
 
-    // for filtering orders list - no buttons yet, defaults to all
+    /**
+     * Filters the orders displayed in the GUI based on the selected status and type.
+     */
     private void applyFilters() {
         if (ordersContainer == null || orderDriver == null){
             return;

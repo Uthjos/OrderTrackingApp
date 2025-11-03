@@ -130,31 +130,64 @@ public class Parser {
         return order;
     }
 
-    public static Order parseExportedFile(File file) throws IOException {
-        int orderID;
+    /**
+     * Parses a saved JSON order file that includes OrderID and Status.
+     * This is a separate method from parseJSONOrder to handle extra saved fields such as OrderID, Status, and Company.
+     * This is used to restore application state on startup.
+     *
+     * @param file              JSON file to be read
+     * @return                  Order object with restored state
+     * @throws IOException      if file can't be read
+     */
+    public static Order parseSavedJSONOrder(File file) throws IOException {
+        int orderId;
         long date;
         double totalPrice;
         Type orderType;
-        Status status;
+        Status orderStatus;
+        String originalCompany = null;
         List<FoodItem> foodItemList = new ArrayList<>();
 
-        JSONObject jsonObject = new JSONObject(new JSONTokener(new FileReader(file)));
-        JSONObject orderJson = (JSONObject) jsonObject.get("order");
-        orderID = (int) orderJson.get("id");
-        date = (long) orderJson.get("date");
-        totalPrice = (double) orderJson.get("total_price");
-        orderType = (Type) orderJson.get("order_type");
-        status = (Status) orderJson.get("status");
+        try (FileReader reader = new FileReader(file)) {
+            JSONObject jsonObject = new JSONObject(new JSONTokener(reader));
 
-        JSONArray foodItemArrayJSON = (JSONArray) orderJson.get("items");
-        for (Object o : foodItemArrayJSON) {
-            int quantity = (int) (long) ((JSONObject) o).get("quantity");
-            double price = (double) ((JSONObject) o).get("price");
-            String name = (String) ((JSONObject) o).get("name");
-            foodItemList.add(new FoodItem(name, quantity, price));
+            orderId = jsonObject.getInt("orderID");
+            date = jsonObject.getLong("date");
+            totalPrice = jsonObject.getDouble("totalPrice");
+
+            String typeStr = jsonObject.getString("type");
+            orderType = Type.valueOf(typeStr.toLowerCase());
+
+            String statusStr = jsonObject.getString("status");
+            orderStatus = Status.valueOf(statusStr);
+
+            if (jsonObject.has("company") && !jsonObject.isNull("company")) {
+                originalCompany = jsonObject.getString("company");
+            }
+
+            JSONArray itemArray = jsonObject.getJSONArray("foodList");
+            for (Object o : itemArray) {
+                JSONObject item = (JSONObject) o;
+                int quantity = item.getInt("quantity");
+                double price = item.getDouble("price");
+                String name = item.getString("name");
+                foodItemList.add(new FoodItem(name, quantity, price));
+            }
         }
 
-        return new Order(orderID, date, totalPrice, orderType , status, foodItemList);
+        Order order = new Order(orderId, date, totalPrice, orderType, orderStatus, foodItemList);
+
+        if (originalCompany != null && !originalCompany.isEmpty()) {
+            if (originalCompany.startsWith("Restored - ")) {
+                order.setCompany(originalCompany);
+            } else {
+                order.setCompany("Restored - " + originalCompany);
+            }
+        } else {
+            order.setCompany("Restored - Unknown");
+        }
+        
+        return order;
     }
 
     /**

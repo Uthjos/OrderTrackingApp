@@ -46,7 +46,7 @@ public class OrderListener implements Runnable {
     }
 
     /**
-     * Loads existing files in the directory on statrtup
+     * Loads existing files in the directory on startup.
      */
     private void loadExistingFiles() {
         File directory = directoryPath.toFile();
@@ -64,12 +64,17 @@ public class OrderListener implements Runnable {
         }
     }
 
-    // starts monitoring the directory in a separate thread for new files
+    /**
+     * Starts monitoring the directory in a separate thread for new files.
+     */
     public void start() {
         executorService.submit(this); // executorService runs the run() method for the current thread.
         // not sure why this is needed instead of just calling run() but this is suggested.
     }
-    // stop
+
+    /**
+     * Stops monitoring the directory and shuts down the executor service.
+     */
     public void stop() {
         running = false;
         executorService.shutdown();

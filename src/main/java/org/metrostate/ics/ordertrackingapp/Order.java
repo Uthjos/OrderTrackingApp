@@ -49,15 +49,14 @@ public class Order {
     }
 
     /**
-     * Constructor that is used to restore previous state after
-     * failure to close
+     * Constructs an Order to restore its previous state after a failure to close the application.
      *
-     * @param orderId
-     * @param date
-     * @param totalPrice
-     * @param type
-     * @param status
-     * @param foodList
+     * @param orderId       The unique ID of the order
+     * @param date          The timestamp of the order in milliseconds
+     * @param totalPrice    The total price of the order
+     * @param type          The type of the order (ex: togo, delivery, or pickup)
+     * @param status        The current status of the order (ex: waiting, inProgress, completed, cancelled)
+     * @param foodList      The list of food items included in the order
      */
     public Order(int orderId, long date, double totalPrice, Type type, Status status, List<FoodItem> foodList) {
         this.orderId = orderId;
@@ -198,10 +197,20 @@ public class Order {
                 String.format("\n\nTotal Price: $%.2f", totalPrice);
     }
 
+    /**
+     * Returns the company name associated with the order.
+     *
+     * @return The company's name
+     */
     public String getCompany() {
         return company;
     }
 
+    /**
+     * Sets the company name associated with the order.
+     *
+     * @param company The company's name
+     */
     public void setCompany(String company) {
         this.company = company;
     }
@@ -232,6 +241,11 @@ public class Order {
         }
     }
 
+    /**
+     * Returns the order's status as a readable string.
+     *
+     * @return The order's status
+     */
     public String displayStatus() {
         switch (this.status) {
             case completed:
@@ -247,6 +261,11 @@ public class Order {
         }
     }
 
+    /**
+     * Returns the order's type as a readable string.
+     *
+     * @return The order's type
+     */
     public String displayType() {
         switch (this.type) {
             case togo:
