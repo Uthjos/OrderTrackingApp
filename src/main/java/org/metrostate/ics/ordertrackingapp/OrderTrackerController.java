@@ -248,7 +248,7 @@ public class OrderTrackerController {
     private void saveStateOnExit() {
         if (orderDriver == null) return;
 
-        String savedOrdersPath = Directory.getDirectory(Directory.saveOrders);
+        String savedOrdersPath = Directory.getDirectory(Directory.savedOrders);
 
         File savedOrdersDir = new File(savedOrdersPath);
         if (!savedOrdersDir.exists()) {

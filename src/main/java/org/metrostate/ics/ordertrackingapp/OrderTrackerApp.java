@@ -40,7 +40,7 @@ public class OrderTrackerApp extends Application {
         loadSavedOrders();
 
         // after saved orders are loaded, watch the importOrders directory
-        String importOrdersPath = Directory.getDirectory(Directory.importOrders)
+        String importOrdersPath = Directory.getDirectory(Directory.importOrders);
         orderListener = new OrderListener(importOrdersPath, controller::addOrderFile);
 
         controller.setOrderListener(orderListener);
