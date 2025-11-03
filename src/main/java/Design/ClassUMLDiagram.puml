@@ -20,14 +20,15 @@ class OrderListener {
     - processedFiles : Set<String>
 
     + OrderListener(directoryPath: String, callback: OrderFileCallback)
+    - waitForFileReadable(file: File, baseSleepMillis: long) : boolean
+    - loadExistingFiles() : void
     + start() : void
     + stop() : void
     + run() : void
-    - loadExistingFiles() : void
 }
 
 interface OrderFileCallback {
-    + onNewOrderFile(file: File)
+    + onNewOrderFile(file: File) : void
 }
 
 class OrderTrackerController {
@@ -38,27 +39,29 @@ class OrderTrackerController {
     - undoButton : Button
     - startButton : Button
     - completeButton : Button
+    - clearAllOrdersButton : Button
     - statusFilter : ComboBox<String>
     - typeFilter : ComboBox<String>
-    - filterContainer : HBox
     - orderFiles : List<String>
     - orderListener : OrderListener
     - orderDriver : OrderDriver
     - selectedOrderBox : VBox
     - selectedOrder : Order
     - driverListener : OrderDriver.OrderChangeListener
-    - BASE_BOX_STYLE : String
+    - BASE_BOX_STYLE : String {final}
 
     + initialize() : void
     + setOrderListener(orderListener: OrderListener) : void
     + setOrderDriver(driver: OrderDriver) : void
-    - exitApplication() : void
+    + exitApplication() : void
+    + clearAllOrders() : void
+    - updateClearAllButtonVisibility() : void
+    - saveStateOnExit() : void
     + addOrderFile(file: File) : void
     - createOrderBox(sourceName: String, order: Order) : VBox
     - updateButtonsVisibility(order: Order) : void
     - showOrderDetails(order: Order) : void
     - selectOrderBox(box: VBox) : void
-    - formatType(raw: String) : String
     - statusColor(status: Status) : String
     - typeColor(formattedType: String) : String
     - cancelSelectedOrder() : void
@@ -74,39 +77,35 @@ class OrderDriver {
     - orders : List<Order>
     - lastCancelledOrder : Order
     - listeners : List<OrderChangeListener>
-
     + OrderDriver()
     + addListener(l: OrderChangeListener) : void
     + removeListener(l: OrderChangeListener) : void
     - notifyOrderAdded(o: Order) : void
     - notifyOrderChanged(o: Order) : void
     + addOrder(order: Order) : void
+    + getOrderCount() : int
     + startOrder(order: Order) : void
     + completeOrder(order: Order) : void
-    + static orderExportJSONAll(orderDriver: OrderDriver, fileDirectory: String) : void
-    + static orderExportJSON(order: Order, fileDirectory: String) : void
+    + orderExportJSON(order: Order, fileDirectory: String) : void
+    + saveAllOrdersToJSON(fileDirectory: String) : void
+    + clearAllOrders() : void
     + getOrders() : List<Order>
-    + getCompleteOrders() : List<Order>
-    + getIncompleteOrders() : List<Order>
     + cancelOrderGUI(order: Order) : boolean
-    + undoCancel() : void
-    + cancelOrder(order: Order) : void
     + uncancelOrder(order: Order) : boolean
-    + getCancelledOrders() : List<Order>
 }
 
 interface OrderChangeListener {
-    + orderAdded(order: Order)
-    + orderChanged(order: Order)
+    + orderAdded(order: Order) : void
+    + orderChanged(order: Order) : void
 }
 
 class Parser {
     - nextOrderNumber : int {static}
 
-    + setNextOrderNumber(orderID: int) : void {static}
-    + parseJSONOrder(file: File) : Order {static}
-    + parseXMLOrder(file: File) : Order {static}
-    + parseExportedFile(file: File) : Order {static}
+    + setNextOrderNumber(orderID : int) : void {static}
+    + parseJSONOrder(file : File) : Order {static}
+    + parseXMLOrder(file : File) : Order {static}
+    + parseSavedJSONOrder(file : File) : Order {static}
     - getNextOrderNumber() : int {static}
     + main(args: String[]) : void {static}
 }
@@ -123,7 +122,6 @@ class Order {
     + Order()
     + Order(orderId: int, type: Type, date: long, foodList: List<FoodItem>)
     + Order(orderId: int, date: long, totalPrice: double, type: Type, status: Status, foodList: List<FoodItem>)
-
     + getDate() : long
     + getTotalPrice() : double
     + getType() : Type
@@ -136,8 +134,8 @@ class Order {
     + toString() : String
     + getCompany() : String
     + setCompany(company: String) : void
-    + parseOrderStatus(stringStatus: String) : Status {static}
-    + parseOrderType(stringType: String) : Type {static}
+    + parseOrderStatus(stringStatus: String) : Status
+    + parseOrderType(stringType: String) : Type
     + displayStatus() : String
     + displayType() : String
 }
@@ -149,7 +147,6 @@ class FoodItem {
 
     + FoodItem()
     + FoodItem(name: String, quantity: int, price: double)
-
     + getName() : String
     + setName(name: String) : void
     + getQuantity() : int
@@ -163,12 +160,14 @@ enum Status {
     completed
     inProgress
     waiting
+    + toString(): String
 }
 
 enum Type {
     togo
     pickup
     delivery
+    + toString(): String
 }
 
 Launcher --> "1" OrderTrackerApp
