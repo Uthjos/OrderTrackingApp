@@ -380,7 +380,12 @@ public class OrderTrackerController {
         }
     }
 
-    //helper to format order types
+    /**
+     * Formats a raw order type string for display.
+     *
+     * @param raw   The raw type string
+     * @return      A formatted type string
+     */
     private String formatType(String raw) {
         if (raw == null) return "";
         String t = raw.trim().toLowerCase();
@@ -392,7 +397,12 @@ public class OrderTrackerController {
         return t.substring(0,1).toUpperCase() + t.substring(1);
     }
 
-    // text color helpers
+    /**
+     * Returns a color code based on the order status.
+     *
+     * @param status    The status of the order
+     * @return          A hex color string corresponding to the status
+     */
     private String statusColor(Status status) {
         if (status == null) return "#666666";
         if (status == Status.completed) { return "#2e7d32"; } // green
@@ -401,6 +411,13 @@ public class OrderTrackerController {
         if (status == Status.cancelled) { return "#c62828"; } // red
         return "#666666";
     }
+
+    /**
+     * Returns a color code based on the order type.
+     *
+     * @param formattedType The formatted order type
+     * @return              A hex color string corresponding to the type
+     */
     private String typeColor(String formattedType) {
         if (formattedType == null) return "#444444";
         String t = formattedType.toLowerCase();
