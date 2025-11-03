@@ -170,6 +170,18 @@ enum Type {
     + toString(): String
 }
 
+enum Directory {
+    + savedOrders
+    + testOrders
+    + importOrders
+    - path : String
+
+    - Directory(path: String)
+    + getPath() : String
+    + getDirectory(directory: Directory) : String
+    - createDirectory(directory: String) : String
+}
+
 Launcher --> "1" OrderTrackerApp
 OrderTrackerApp "1" --> "1" OrderListener
 OrderListener "1" --> "1" OrderFileCallback
