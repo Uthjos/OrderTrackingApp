@@ -4,12 +4,10 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.nio.file.Files.createDirectory;
-
 public enum Directory {
-    saveOrders("orderFiles/SaveOrders"),
-    testOrders("orderFiles/TestOrders"),
-    importOrders("orderFiles/ImportOrders");
+    savedOrders("orderFiles/savedOrders"),
+    testOrders("orderFiles/testOrders"),
+    importOrders("orderFiles/importOrders");
 
     private final String path;
 
