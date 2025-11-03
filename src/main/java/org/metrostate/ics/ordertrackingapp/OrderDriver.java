@@ -3,7 +3,6 @@ package org.metrostate.ics.ordertrackingapp;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -99,6 +98,15 @@ public class OrderDriver {
     }
 
     /**
+     * Returns the total number of orders in the system.
+     *
+     * @return The number of orders
+     */
+    public int getOrderCount() {
+        return orders.size();
+    }
+
+    /**
      * Starts an order if its status is "INCOMING".
      * Changes the status of the order to "IN PROGRESS".
      *
@@ -126,15 +134,8 @@ public class OrderDriver {
         }
     }
 
-
-    public static void orderExportJSONAll (OrderDriver orderDriver, String fileDirectory) {
-        for (Order order : orderDriver.orders) {
-            orderExportJSON(order, fileDirectory);
-        }
-    }
-
     /**
-     * Saves the given order as a JSON file in the specified directory.
+     * Exports a single order as a JSON file to the savedOrders directory.
      *
      * @param order             The order to save
      * @param fileDirectory     The folder where the JSON file will be created
@@ -144,10 +145,10 @@ public class OrderDriver {
 
         OrderJSON.put("orderID", order.getOrderID());
         OrderJSON.put("date", order.getDate());
-
-        OrderJSON.put("totalPrice", String.format("%.2f", order.getTotalPrice()));
-        OrderJSON.put("type", order.getType());
-        OrderJSON.put("status", order.getStatus());
+        OrderJSON.put("totalPrice", order.getTotalPrice());
+        OrderJSON.put("type", order.getType().toString().toLowerCase());
+        OrderJSON.put("status", order.getStatus().toString());
+        OrderJSON.put("company", order.getCompany());
 
         JSONArray orderFoodsList = new JSONArray();
         for (FoodItem food : order.getFoodList()) {
@@ -160,65 +161,49 @@ public class OrderDriver {
 
         OrderJSON.put("foodList", orderFoodsList);
 
-        String fileNameDir = "order" + order.getOrderID() + "_" + order.getDate() + ".json";
-        String filePath = fileDirectory + "/" + fileNameDir;
+        String fileName = "Saved_Order" + order.getOrderID() + ".json";
+        String filePath = fileDirectory + File.separator + fileName;
 
         File fileDir = new File(fileDirectory);
         if (!fileDir.exists()) {
-            boolean created = fileDir.mkdirs();
-            if (!created) {
-                System.out.println("Error creating directory: " + filePath);
-                return;
-            } else {
-                System.out.println("Directory created: " + filePath);
-            }
+            fileDir.mkdirs();
         }
 
         try (FileWriter fw = new FileWriter(filePath)) {
-            fw.write(OrderJSON.toString(4)); // pretty print with indent of 4
+            fw.write(OrderJSON.toString(4));
             fw.flush();
         } catch (IOException e) {
+            System.err.println("Error saving order to JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+
+
     /**
-     * Returns a list of all orders in the system.
+     * Saves all orders in the driver to JSON files in the savedOrders directory.
      *
+     * @param fileDirectory The directory to save orders to
+     */
+    public void saveAllOrdersToJSON(String fileDirectory) {
+        for (Order order : orders) {
+            orderExportJSON(order, fileDirectory);
+        }
+    }
+
+    /**
+     * Clears all orders from the system.
+     */
+    public void clearAllOrders() {
+        orders.clear();
+        lastCancelledOrder = null;
+    }
+
+    /**
      * @return List of all orders
      */
     public List<Order> getOrders() {
         return orders;
-    }
-
-    /**
-     * Returns a list of completed orders.
-     *
-     * @return List of completed orders
-     */
-    public List<Order> getCompleteOrders() {
-        List<Order> completedOrders = new ArrayList<>();
-        for (Order order : orders) {
-            if (order.getStatus() == Status.completed) {
-                completedOrders.add(order);
-            }
-        }
-        return completedOrders;
-    }
-
-    /**
-     * Returns a list of incomplete orders.
-     *
-     * @return List of incomplete orders
-     */
-    public List<Order> getIncompleteOrders() {
-        List<Order> incompleteOrders = new ArrayList<>();
-        for (Order order : orders) {
-            if (order.getStatus() != Status.completed) {
-                incompleteOrders.add(order);
-            }
-        }
-        return incompleteOrders;
     }
 
     /**
@@ -237,26 +222,6 @@ public class OrderDriver {
         return true;
     }
 
-    public void undoCancel() {
-        if (lastCancelledOrder != null && lastCancelledOrder.getStatus() == Status.cancelled) {
-            Order prev = lastCancelledOrder;
-            prev.setStatus(Status.waiting);
-            // notify listeners about the change to the previously cancelled order
-            notifyOrderChanged(prev);
-            lastCancelledOrder = null;
-        }
-    }
-
-    /**
-     * Cancels an order by removing it from the orders list and setting its status to "CANCELED".
-     *
-     * @param order The order to cancel
-     */
-    public void cancelOrder(Order order) {
-        order.setStatus(Status.cancelled);
-        notifyOrderChanged(order);
-    }
-
     /**
      * Un-cancel a specific order (set status back to waiting) if it is currently cancelled.
      * Returns true if the order was un-cancelled, false otherwise.
@@ -270,20 +235,5 @@ public class OrderDriver {
         }
         notifyOrderChanged(order);
         return true;
-    }
-
-    /**
-     * Returns a list of canceled orders.
-     *
-     * @return List of canceled orders
-     */
-    public List<Order> getCancelledOrders() {
-        List<Order> cancelledOrders = new ArrayList<>();
-        for (Order order : orders) {
-            if (order.getStatus() == Status.cancelled) {
-                cancelledOrders.add(order);
-            }
-        }
-        return cancelledOrders;
     }
 }
