@@ -186,6 +186,7 @@ Launcher --> "1" OrderTrackerApp
 OrderTrackerApp "1" --> "1" OrderListener
 OrderListener "1" --> "1" OrderFileCallback
 OrderListener "1" --> "1" OrderTrackerController
+OrderListener "1" ..> "1" Directory
 OrderTrackerController "1" --> "1" Parser
 OrderTrackerController "1" --> "1" OrderDriver
 OrderDriver "1" --> "0..*" OrderChangeListener
@@ -193,5 +194,5 @@ OrderDriver "1" --> "1..*" Order
 Order "1" --> "1..*" FoodItem
 Order "1" --> "1" Status
 Order "1" --> "1" Type
-
+Parser "1" ..> "1" Directory
 @enduml
