@@ -37,13 +37,13 @@ public class OrderTrackerController {
     private Button completeButton;
 
     @FXML
+    private Button clearAllOrdersButton;
+
+    @FXML
     private ComboBox<String> statusFilter;
 
     @FXML
     private ComboBox<String> typeFilter;
-
-    @FXML
-    private HBox filterContainer;
 
     private List<String> orderFiles;
     private OrderListener orderListener;
@@ -120,6 +120,12 @@ public class OrderTrackerController {
             typeFilter.setValue("All");
             typeFilter.setOnAction(e -> applyFilters());
         }
+
+        // clear all order sbutton hidden at startup
+        if (clearAllOrdersButton != null) {
+            clearAllOrdersButton.setVisible(false);
+            clearAllOrdersButton.setManaged(false);
+        }
     }
 
     /**
@@ -145,7 +151,10 @@ public class OrderTrackerController {
                 @Override
                 public void orderAdded(Order order) {
                     // orders on seperate thread - update UI on JavaFX thread
-                    Platform.runLater(() -> applyFilters());
+                    Platform.runLater(() -> {
+                        applyFilters();
+                        updateClearAllButtonVisibility(); //only visible when there are orders
+                    });
                 }
 
                 @Override
@@ -173,6 +182,7 @@ public class OrderTrackerController {
      */
     @FXML
     private void exitApplication() {
+        saveStateOnExit();
 
         // stop the OrderListener thread
         if (orderListener != null) {
@@ -183,6 +193,70 @@ public class OrderTrackerController {
         }
         Platform.exit();
         System.exit(0);
+    }
+
+    /**
+     * Called by the Clear All button in the FXML
+     * Clears all orders from the system after confirmation
+     */
+    @FXML
+    private void clearAllOrders() {
+        if (orderDriver == null) return;
+
+        // confirmation dialog
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Clear All Orders");
+        alert.setHeaderText("Are you sure you want to clear all orders?");
+        alert.setContentText("This will remove all orders from the system. This action cannot be undone.");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                orderDriver.clearAllOrders();
+
+                if (ordersContainer != null) {
+                    ordersContainer.getChildren().clear();
+                }
+                if (detailContainer != null) {
+                    detailContainer.getChildren().clear();
+                    Label header = new Label("Order Details");
+                    header.setFont(Font.font("System", FontWeight.BOLD, 16));
+                    detailContainer.getChildren().add(header);
+                }
+
+                selectedOrder = null;
+                selectedOrderBox = null;
+
+                updateClearAllButtonVisibility();
+            }
+        });
+    }
+
+    /**
+     * Updates the visibility of the Clear All Orders button based on whether there are any orders.
+     */
+    private void updateClearAllButtonVisibility() {
+        if (clearAllOrdersButton != null && orderDriver != null) {
+            boolean hasOrders = orderDriver.getOrderCount() > 0;
+            clearAllOrdersButton.setVisible(hasOrders);
+            clearAllOrdersButton.setManaged(hasOrders);
+        }
+    }
+
+    /**
+     * Saves all current orders to the savedOrders directory as JSON files.
+     */
+    private void saveStateOnExit() {
+        if (orderDriver == null) return;
+
+        String projectPath = System.getProperty("user.dir");
+        String savedOrdersPath = java.nio.file.Paths.get(projectPath, "src", "main", "orderFiles", "savedOrders").toString();
+
+        File savedOrdersDir = new File(savedOrdersPath);
+        if (!savedOrdersDir.exists()) {
+            savedOrdersDir.mkdirs();
+        }
+
+        orderDriver.saveAllOrdersToJSON(savedOrdersPath);
     }
 
     /**
