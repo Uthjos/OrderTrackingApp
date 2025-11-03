@@ -146,8 +146,8 @@ public class OrderDriver {
         OrderJSON.put("orderID", order.getOrderID());
         OrderJSON.put("date", order.getDate());
         OrderJSON.put("totalPrice", order.getTotalPrice());
-        OrderJSON.put("type", order.getType().toString().toLowerCase());
-        OrderJSON.put("status", order.getStatus().toString());
+        OrderJSON.put("type", order.getType());
+        OrderJSON.put("status", order.getStatus());
         OrderJSON.put("company", order.getCompany());
 
         JSONArray orderFoodsList = new JSONArray();

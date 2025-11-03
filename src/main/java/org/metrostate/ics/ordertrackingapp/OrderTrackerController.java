@@ -100,9 +100,6 @@ public class OrderTrackerController {
         if (statusFilter != null) {
             statusFilter.getItems().add("All");
             for (Status s : Status.values()) {
-                //statusFilter.getItems().add(s.toString());
-                //String display = s.name().substring(0, 1).toUpperCase() + s.name().substring(1);
-                //statusFilter.getItems().add(display);
                 Order temp = new Order();
                 temp.setStatus(s);
                 statusFilter.getItems().add(temp.displayStatus());
@@ -114,8 +111,7 @@ public class OrderTrackerController {
         if (typeFilter != null) {
             typeFilter.getItems().add("All");
             for (Type t : Type.values()) {
-                String display = formatType(t.name());
-                typeFilter.getItems().add(display);
+                typeFilter.getItems().add(t.toString());
             }
             typeFilter.setValue("All");
             typeFilter.setOnAction(e -> applyFilters());
@@ -341,7 +337,7 @@ public class OrderTrackerController {
             statusLabel.setStyle("-fx-text-fill: " + statusColor(order.getStatus()) + ";");
 
             // type formatting
-            String type = formatType(order.displayType());
+            String type = order.displayType();
             typeLabel.setText(type);
             typeLabel.setStyle("-fx-text-fill: " + typeColor(type) + "; -fx-font-weight: bold;");
 
@@ -453,22 +449,6 @@ public class OrderTrackerController {
         }
     }
 
-    /**
-     * Formats a raw order type string for display.
-     *
-     * @param raw   The raw type string
-     * @return      A formatted type string
-     */
-    private String formatType(String raw) {
-        if (raw == null) return "";
-        String t = raw.trim().toLowerCase();
-        if (t.equals("togo")){
-            return "To-go";
-        }
-        // capitalize first letter
-        if (t.isEmpty()) return t;
-        return t.substring(0,1).toUpperCase() + t.substring(1);
-    }
 
     /**
      * Returns a color code based on the order status.
@@ -658,9 +638,8 @@ public class OrderTrackerController {
                     // secondRow: [typeLabel, spacer, companyLabel]
                     if (boxToUpdate.getChildren().size() > 1 && boxToUpdate.getChildren().get(1) instanceof HBox secondRow) {
                         if (!secondRow.getChildren().isEmpty() && secondRow.getChildren().getFirst() instanceof Label typeLabel) {
-                            String formattedType = formatType(String.valueOf(orderCopy.displayType()));
-                            typeLabel.setText(formattedType);
-                            typeLabel.setStyle("-fx-text-fill: " + typeColor(formattedType) + "; -fx-font-weight: bold;");
+                            typeLabel.setText(orderCopy.displayType());
+                            typeLabel.setStyle("-fx-text-fill: " + typeColor(orderCopy.displayType()) + "; -fx-font-weight: bold;");
                         }
                     }
                 }
@@ -753,8 +732,7 @@ public class OrderTrackerController {
         for (Order order : orderDriver.getOrders()) {
             boolean statusMatch = selectedStatus.equals("All") ||
                     order.displayStatus().equalsIgnoreCase(selectedStatus);
-            String formattedType = formatType(order.displayType());
-            boolean typeMatch = selectedType.equals("All") || formattedType.equalsIgnoreCase(selectedType);
+            boolean typeMatch = selectedType.equals("All") || order.displayType().equalsIgnoreCase(selectedType);
 
             if (statusMatch && typeMatch) {
                 VBox box = existing.get(order.getOrderID());
