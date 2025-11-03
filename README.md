@@ -21,6 +21,7 @@ A Java/JavaFX desktop application for managing restaurant orders.
 - Source: `src/main/java`
 - FXML/UI: `src/main/resources/org/metrostate/ics/ordertrackingapp/order-tracker-view.fxml`
 - Orders and working files: `src/main/orderFiles/` (contains `testOrders/`, `savedOrders/`, `importOrders/`)
+    -`src/main/orderFiles/~ordersBackup/` is just used as a place to store our group's test files that won't be seen or used by the program.
 - Tests: `test/java/org/metrostate/ics/ordertrackingapp/`
 
 Note: The repository purposely keeps placeholder files (`spaceHolder.txt`) in the `orderFiles` directories so Git tracks the directories when actual JSON/XML orders are ignored.
