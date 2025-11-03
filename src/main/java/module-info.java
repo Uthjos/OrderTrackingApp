@@ -3,6 +3,7 @@ module org.metrostate.ics.ordertrackingapp {
     requires javafx.fxml;
     requires org.json;
     requires java.xml;
+    requires javafx.graphics;
 
 
     opens org.metrostate.ics.ordertrackingapp to javafx.fxml;

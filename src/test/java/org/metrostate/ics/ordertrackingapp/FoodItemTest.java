@@ -14,26 +14,21 @@ class FoodItemTest {
     }
 
     @Test
-    void setName() {
-    }
-
-    @Test
     void getQuantity() {
-    }
-
-    @Test
-    void setQuantity() {
+        FoodItem testItem = new FoodItem("Apple",4,3.22);
+        assertEquals(4,testItem.getQuantity());
     }
 
     @Test
     void getPrice() {
-    }
-
-    @Test
-    void setPrice() {
+        FoodItem testItem = new FoodItem("Apple",4,3.22);
+        assertEquals(3.22,testItem.getPrice());
     }
 
     @Test
     void testToString() {
+        FoodItem testItem = new FoodItem("Apple",4,3.22);
+
+        assertEquals("\n  " + 4 + "x " + "Apple" + " - " + String.format("$%.2f", 3.22) + " each", testItem.toString());
     }
 }

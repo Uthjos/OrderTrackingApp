@@ -205,7 +205,7 @@ public class Parser {
      * Prints to console.
      */
     public static void main(String[] args) throws IOException {
-        File file = new File("code/src/main/java/Resources/order_09-16-2025_10-00.json");
+        File file = new File("src/main/orderFiles/testOrders/order_09-16-2025_10-00.json");
         Order myOrder = Parser.parseJSONOrder(file);
         System.out.println(myOrder);
     }
