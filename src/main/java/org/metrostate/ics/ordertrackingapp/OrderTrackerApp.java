@@ -8,8 +8,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Main application class for the Order Tracking System.
@@ -17,7 +15,6 @@ import java.util.List;
  */
 public class OrderTrackerApp extends Application {
     private OrderListener orderListener;
-    private OrderDriver driver;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -33,15 +30,12 @@ public class OrderTrackerApp extends Application {
 
         OrderTrackerController controller = fxmlLoader.getController();
 
-        driver = new OrderDriver();
+        OrderDriver driver = new OrderDriver();
         controller.setOrderDriver(driver);
 
-        // load saved orders first
-        loadSavedOrders();
-
-        // after saved orders are loaded, watch the importOrders directory
-        String importOrdersPath = getImportOrdersPath();
-        orderListener = new OrderListener(importOrdersPath, controller::addOrderFile);
+        // watch the testOrders directory
+        String testOrdersPath = getTestOrdersPath();
+        orderListener = new OrderListener(testOrdersPath, controller::addOrderFile);
 
         controller.setOrderListener(orderListener);
 
@@ -51,111 +45,25 @@ public class OrderTrackerApp extends Application {
         stage.setScene(scene);
         stage.show();
 
-        // stop the listener when the application closes and save state
+        // stop the listener when the application closes
         stage.setOnCloseRequest(event -> {
             if (orderListener != null) {
                 orderListener.stop();
             }
-            saveCurrentState();
         });
     }
 
     /**
-     * Loads all saved orders from the savedOrders directory on startup.
-     * Updates the nextOrderNumber to continue from the highest ID found.
-     * Deletes the saved order files after loading.
+     * Gets the path to the testOrders directory
      */
-    private void loadSavedOrders() {
+    private String getTestOrdersPath() {
         String projectPath = System.getProperty("user.dir");
-        String savedOrdersPath = Paths.get(projectPath, "src", "main", "orderFiles", "savedOrders").toString();
-        File savedOrdersDir = new File(savedOrdersPath);
+        String testOrdersPath = Paths.get(projectPath, "src", "main", "orderFiles", "importOrders").toString();
 
-        if (!savedOrdersDir.exists()) {
-            savedOrdersDir.mkdirs();
-            return;
+        File testOrdersDir = new File(testOrdersPath);
+        if (!testOrdersDir.exists()) {
+            testOrdersDir.mkdirs();
         }
-
-        File[] savedFiles = savedOrdersDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
-        if (savedFiles == null || savedFiles.length == 0) {
-            return;
-        }
-
-        int maxOrderId = 0;
-        List<File> filesToDelete = new ArrayList<>();
-
-        // load each saved order
-        for (File file : savedFiles) {
-            try {
-                Order order = Parser.parseSavedJSONOrder(file);
-                if (order != null) {
-                    driver.addOrder(order);
-                    // track maximum order ID from previous state
-                    if (order.getOrderID() > maxOrderId) {
-                        maxOrderId = order.getOrderID();
-                    }
-                    filesToDelete.add(file);
-                }
-            } catch (Exception e) {
-                System.err.println("Error loading saved order from " + file.getName() + ": " + e.getMessage());
-            }
-        }
-
-        if (maxOrderId > 0) {
-            Parser.setNextOrderNumber(maxOrderId);
-        }
-
-        try { //delay to make sure all file handles are released
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        // delete saved orders after loading
-        for (File file : filesToDelete) {
-            try {
-                // force garbabe collection to release file handles for deletion
-                System.gc();
-
-                if (file.exists() && !file.delete()) {
-                    boolean deleted = new File(file.getAbsolutePath()).delete();
-                    if (!deleted) {
-                        file.deleteOnExit();
-                    }
-                }
-            } catch (Exception e) {
-                file.deleteOnExit();
-            }
-        }
-    }
-
-    /**
-     * Saves the current state by exporting all orders to JSON files in the savedOrders directory.
-     */
-    private void saveCurrentState() {
-        String projectPath = System.getProperty("user.dir");
-        String savedOrdersPath = Paths.get(projectPath, "src", "main", "orderFiles", "savedOrders").toString();
-
-        File savedOrdersDir = new File(savedOrdersPath);
-        if (!savedOrdersDir.exists()) {
-            savedOrdersDir.mkdirs();
-        }
-
-        if (driver != null) {
-            driver.saveAllOrdersToJSON(savedOrdersPath);
-        }
-    }
-
-    /**
-     * Gets the path to the importOrders directory
-     */
-    private String getImportOrdersPath() {
-        String projectPath = System.getProperty("user.dir");
-        String importOrdersPath = Paths.get(projectPath, "src", "main", "orderFiles", "importOrders").toString();
-
-        File importOrdersDir = new File(importOrdersPath);
-        if (!importOrdersDir.exists()) {
-            importOrdersDir.mkdirs();
-        }
-        return importOrdersPath;
+        return testOrdersPath;
     }
 }
