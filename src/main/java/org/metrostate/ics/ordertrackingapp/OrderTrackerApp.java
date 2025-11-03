@@ -40,7 +40,7 @@ public class OrderTrackerApp extends Application {
         loadSavedOrders();
 
         // after saved orders are loaded, watch the importOrders directory
-        String importOrdersPath = getImportOrdersPath();
+        String importOrdersPath = Directory.getDirectory(Directory.importOrders)
         orderListener = new OrderListener(importOrdersPath, controller::addOrderFile);
 
         controller.setOrderListener(orderListener);
@@ -126,13 +126,6 @@ public class OrderTrackerApp extends Application {
                 file.deleteOnExit();
             }
         }
-    }
-
-    /**
-     * Returns the path to the importOrders directory using the Directory enum helper.
-     */
-    private String getImportOrdersPath() {
-        return Directory.getDirectory(Directory.importOrders);
     }
 
     /**
