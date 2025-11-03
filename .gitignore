@@ -42,5 +42,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-# Ignore test order files generated for local testing
-/src/main/orderFiles/testOrders/**
+# Ignore order files (JSON and XML) but keep directory placeholders like spaceHolder.txt
+/src/main/orderFiles/**/*.json
+/src/main/orderFiles/**/*.xml
