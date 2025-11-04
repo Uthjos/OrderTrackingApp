@@ -48,6 +48,9 @@ https://docs.google.com/document/d/1ZZ_qqwHPmVuCYHXN2_n7UoWFspIYIPRkLV6WVAtXNIA/
 
 ## System Loads Orders on Startup Sequence Diagram
 ![Project 2 Sequence Diagram](src/main/java/Design/SystemLoadsOrdersOnStartup.png)
+## System Saves Orders on Exit Sequence Diagram
+![Project 2 Sequence Diagram](src/main/java/Design/StaffSavesOrdersOnExit.png)
+
 ## UML Class Diagram
 ![Project 2 UML](src/main/java/Design/ClassUMLDiagram.png)
 
