@@ -39,6 +39,7 @@ Run within an IDE that supports Gradle (e.g., IntelliJ IDEA) by running the "Lau
 5. Optionally, clear all orders using the "Clear All Orders" button.
 6. On exit:
     - All current orders will be saved to `src/main/orderFiles/savedOrders/` as JSON files.
+         - In case of a crash, this is also done when a new file is loaded or has its status changed.
     - On the next startup, these saved orders will be automatically loaded then cleared from the directory.
     - Any order files in `src/main/orderFiles/importOrders/` will be moved into the `testOrders/` directory for any future use and will not be re-imported on the next startup, unless moved back manually.
 
