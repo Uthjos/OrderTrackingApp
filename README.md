@@ -46,7 +46,7 @@ Run within an IDE that supports Gradle (e.g., IntelliJ IDEA) by running the "Lau
 ## Requirements and Use Case Document
 https://docs.google.com/document/d/1ZZ_qqwHPmVuCYHXN2_n7UoWFspIYIPRkLV6WVAtXNIA/edit?tab=t.0
 
-## System Loads Orders on Startup Sequence Diagram
+## System Loads Orders on Import Directory Update Sequence Diagram
 ![Project 2 Sequence Diagram](src/main/java/Design/SystemLoadsOrdersOnStartup.png)
 ## System Saves Orders on Exit Sequence Diagram
 ![Project 2 Sequence Diagram](src/main/java/Design/StaffSavesOrdersOnExit.png)
