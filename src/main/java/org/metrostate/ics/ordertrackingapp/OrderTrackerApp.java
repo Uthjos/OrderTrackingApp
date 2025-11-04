@@ -34,10 +34,9 @@ public class OrderTrackerApp extends Application {
         OrderTrackerController controller = fxmlLoader.getController();
 
         driver = new OrderDriver();
-        controller.setOrderDriver(driver);
 
-        // load saved orders first
         loadSavedOrders();
+        controller.setOrderDriver(driver);
 
         // after saved orders are loaded, watch the importOrders directory
         String importOrdersPath = Directory.getDirectory(Directory.importOrders);

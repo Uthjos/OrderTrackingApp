@@ -150,6 +150,7 @@ public class OrderTrackerController {
                 public void orderAdded(Order order) {
                     // orders on separate thread - update UI on JavaFX thread
                     Platform.runLater(() -> {
+                        // save new order to savedOrders
                         OrderDriver.orderExportJSON(order, Directory.getDirectory(Directory.savedOrders));
                         applyFilters();
                         updateClearAllButtonVisibility(); //only visible when there are orders
@@ -160,6 +161,7 @@ public class OrderTrackerController {
                 public void orderChanged(Order order) {
                     //another thread - update UI on JavaFX thread
                     Platform.runLater(() -> {
+                        // save updated order to savedOrders
                         OrderDriver.orderExportJSON(order, Directory.getDirectory(Directory.savedOrders));
                         applyFilters();
                         VBox box = findOrderBoxForOrder(order);
@@ -174,7 +176,19 @@ public class OrderTrackerController {
                 }
             };
             this.orderDriver.addListener(driverListener);
-        }
+            //update UI again since orders may have been loaded before listener was added
+            if (Platform.isFxApplicationThread()) {
+                try {
+                    applyFilters();
+                    updateClearAllButtonVisibility();
+                } catch (Exception ignored) { }
+            } else {
+                Platform.runLater(() -> {
+                    applyFilters();
+                    updateClearAllButtonVisibility();
+                });
+            }
+         }
     }
 
     /**
