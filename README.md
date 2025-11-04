@@ -42,6 +42,8 @@ Run within an IDE that supports Gradle (e.g., IntelliJ IDEA) by running the "Lau
     - On the next startup, these saved orders will be automatically loaded then cleared from the directory.
     - Any order files in `src/main/orderFiles/importOrders/` will be moved into the `testOrders/` directory for any future use and will not be re-imported on the next startup, unless moved back manually.
 
+## Requirements and Use Case Document
+https://docs.google.com/document/d/1ZZ_qqwHPmVuCYHXN2_n7UoWFspIYIPRkLV6WVAtXNIA/edit?tab=t.0
 
 ## Dependencies
 
